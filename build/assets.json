@@ -1,0 +1,50 @@
+{
+  "version": "1b8b103a",
+  "entry": {
+    "module": "/build/entry.client-EG24NOEE.js",
+    "imports": [
+      "/build/_shared/chunk-7IBBT256.js",
+      "/build/_shared/chunk-DOM5QJLA.js"
+    ]
+  },
+  "routes": {
+    "root": {
+      "id": "root",
+      "path": "/",
+      "module": "/build/root-7OFRM5DI.js",
+      "imports": [
+        "/build/_shared/chunk-DOK4MDSW.js"
+      ],
+      "hasAction": false,
+      "hasLoader": false
+    },
+    "routes/404": {
+      "id": "routes/404",
+      "parentId": "root",
+      "path": "*",
+      "caseSensitive": false,
+      "module": "/build/routes/404-6MNGCQQN.js",
+      "hasAction": false,
+      "hasLoader": false
+    },
+    "routes/index": {
+      "id": "routes/index",
+      "parentId": "root",
+      "path": "/",
+      "caseSensitive": false,
+      "module": "/build/routes/index-BWL664EG.js",
+      "hasAction": false,
+      "hasLoader": true
+    },
+    "routes/servers": {
+      "id": "routes/servers",
+      "parentId": "root",
+      "path": "servers",
+      "caseSensitive": false,
+      "module": "/build/routes/servers-OLNILSBD.js",
+      "hasAction": false,
+      "hasLoader": true
+    }
+  },
+  "url": "/build/manifest-1B8B103A.js"
+}
