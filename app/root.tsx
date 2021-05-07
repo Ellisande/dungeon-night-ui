@@ -1,15 +1,12 @@
 import type { LinksFunction, LoaderFunction } from "remix";
 import { Meta, Links, Scripts, useRouteData, LiveReload } from "remix";
 import { Outlet } from "react-router-dom";
-import firebase from "firebase";
 
 import stylesUrl from "./styles/global.css";
 
-import { config } from "../firebaseConfig";
 import { FirestoreContext } from "./context/firestoreContext";
 import { FirebaseAuthContext } from "./context/firebaseAuthContext";
 import { useEffect, useState } from "react";
-import { getFirebaseApp } from "./firebaseApp";
 
 export let links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -38,9 +35,7 @@ export default function App() {
   const app = useRouteData();
   return (
     <Document>
-      <FirestoreContext.Provider value={getFirebaseApp().firestore()}>
-        <Outlet />
-      </FirestoreContext.Provider>
+      <Outlet />
     </Document>
   );
 }

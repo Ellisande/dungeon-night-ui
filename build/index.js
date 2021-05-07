@@ -79,33 +79,6 @@ var import_react_router_dom = __toModule(require("react-router-dom"));
 // app/styles/global.css
 var global_default = "/build/_assets/global-I5E7NNPL.css";
 
-// app/context/firestoreContext.ts
-var import_react = __toModule(require("react"));
-var FirestoreContext = (0, import_react.createContext)(void 0);
-
-// app/firebaseApp.ts
-var import_firebase = __toModule(require("firebase"));
-
-// firebaseConfig.ts
-var config = {
-  apiKey: "AIzaSyB8laRFNWlGcuEWp66Du-4GAIgTBbWpzZE",
-  authDomain: "dungeon-night.firebaseapp.com",
-  projectId: "dungeon-night",
-  storageBucket: "dungeon-night.appspot.com",
-  messagingSenderId: "62082775087",
-  appId: "1:62082775087:web:a5a535863690e68ed12eda",
-  measurementId: "G-G1E5691Z0J"
-};
-
-// app/firebaseApp.ts
-function getApp() {
-  if (!import_firebase.default.apps.length) {
-    return import_firebase.default.initializeApp(config);
-  } else {
-    return import_firebase.default.apps[0];
-  }
-}
-
 // route-module:C:\Users\Ellisande\source\dungeon-night-ui\app\root.tsx
 var links = () => {
   return [{rel: "stylesheet", href: global_default}];
@@ -123,9 +96,7 @@ function Document({children}) {
 }
 function App() {
   const app = (0, import_remix2.useRouteData)();
-  return /* @__PURE__ */ React.createElement(Document, null, /* @__PURE__ */ React.createElement(FirestoreContext.Provider, {
-    value: getApp().firestore()
-  }, /* @__PURE__ */ React.createElement(import_react_router_dom.Outlet, null)));
+  return /* @__PURE__ */ React.createElement(Document, null, /* @__PURE__ */ React.createElement(import_react_router_dom.Outlet, null));
 }
 function ErrorBoundary({error}) {
   return /* @__PURE__ */ React.createElement(Document, null, /* @__PURE__ */ React.createElement("h1", null, "App Error"), /* @__PURE__ */ React.createElement("pre", null, error.message), /* @__PURE__ */ React.createElement("p", null, "Replace this UI with what you want users to see when your app throws uncaught errors."));
@@ -186,22 +157,108 @@ __export(servers_exports, {
   loader: () => loader2,
   meta: () => meta3
 });
+var import_react_router = __toModule(require("react-router"));
 var import_remix4 = __toModule(require("remix"));
-var import_firebase2 = __toModule(require("firebase"));
+
+// app/utils/firebase.ts
+var import_firebase = __toModule(require("firebase"));
+
+// firebaseConfig.ts
+var config = {
+  apiKey: "AIzaSyB8laRFNWlGcuEWp66Du-4GAIgTBbWpzZE",
+  authDomain: "dungeon-night.firebaseapp.com",
+  projectId: "dungeon-night",
+  storageBucket: "dungeon-night.appspot.com",
+  messagingSenderId: "62082775087",
+  appId: "1:62082775087:web:a5a535863690e68ed12eda",
+  measurementId: "G-G1E5691Z0J"
+};
+
+// app/utils/firebase.ts
+var lazyDb;
+async function getLfgToonNames(serverId) {
+  var _a;
+  const toonNameSnapshot = await getDb().doc(`/guilds/${serverId}/lfg/toonNames`).get();
+  return toonNameSnapshot.exists ? (_a = toonNameSnapshot == null ? void 0 : toonNameSnapshot.data()) == null ? void 0 : _a.toonNames : [];
+}
+async function getServers() {
+  const serversRef = getDb().collection("/guilds");
+  const serverSnapshot = await serversRef.get();
+  const servers = [];
+  await serverSnapshot.forEach((doc) => {
+    const data = doc.data() || {};
+    servers.push(__objSpread({
+      id: doc.id
+    }, data));
+  });
+  return servers;
+}
+function getDb() {
+  if (!lazyDb) {
+    lazyDb = getFirebase().firestore();
+  }
+  return lazyDb;
+}
+var lazyFirebase;
+function getFirebase() {
+  if (import_firebase.default.apps.length) {
+    lazyFirebase = import_firebase.default.app();
+  }
+  if (!lazyFirebase) {
+    import_firebase.default.initializeApp(config);
+    lazyFirebase = import_firebase.default.app();
+  }
+  return lazyFirebase;
+}
+
+// route-module:C:\Users\Ellisande\source\dungeon-night-ui\app\routes\servers.tsx
 var loader2 = async () => {
-  const snapshot = await import_firebase2.default.firestore().doc("guilds/734593378162835526").get();
-  return await snapshot.data;
+  const servers = await getServers();
+  return (0, import_remix4.json)(servers);
 };
 function Servers() {
-  const data = (0, import_remix4.useRouteData)();
-  console.log(data);
-  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h2", null, "hello world"));
+  const servers = (0, import_remix4.useRouteData)();
+  console.log(servers);
+  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("aside", null, servers.map((server) => /* @__PURE__ */ React.createElement("div", {
+    key: server.id
+  }, /* @__PURE__ */ React.createElement(import_remix4.Link, {
+    to: server.id
+  }, server.name)))), /* @__PURE__ */ React.createElement(import_react_router.Outlet, null));
 }
 function meta3() {
   return {
     title: "Discord Servers",
     description: "List of discord servers supported by the bot."
   };
+}
+
+// route-module:C:\Users\Ellisande\source\dungeon-night-ui\app\routes\servers\$server.tsx
+var server_exports = {};
+__export(server_exports, {
+  default: () => ServerView,
+  loader: () => loader3
+});
+var import_remix5 = __toModule(require("remix"));
+var loader3 = async ({params}) => {
+  const serverId = params.server;
+  const lfgToons = await getLfgToonNames(serverId);
+  console.log(lfgToons);
+  return (0, import_remix5.json)(lfgToons);
+};
+function ServerView() {
+  const lfgToonNames = (0, import_remix5.useRouteData)();
+  return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("ul", null, lfgToonNames.map((name) => /* @__PURE__ */ React.createElement("li", {
+    key: name
+  }, name))));
+}
+
+// route-module:C:\Users\Ellisande\source\dungeon-night-ui\app\routes\servers\index.tsx
+var servers_exports2 = {};
+__export(servers_exports2, {
+  default: () => Placeholder
+});
+function Placeholder() {
+  return /* @__PURE__ */ React.createElement("div", null, "Select a server");
 }
 
 // <stdin>
@@ -235,6 +292,20 @@ var routes = {
     path: "servers",
     caseSensitive: false,
     module: servers_exports
+  },
+  "routes/servers/$server": {
+    id: "routes/servers/$server",
+    parentId: "routes/servers",
+    path: ":server",
+    caseSensitive: false,
+    module: server_exports
+  },
+  "routes/servers/index": {
+    id: "routes/servers/index",
+    parentId: "routes/servers",
+    path: "/",
+    caseSensitive: false,
+    module: servers_exports2
   }
 };
 // Annotate the CommonJS export names for ESM import in node:

@@ -1,19 +1,24 @@
-import { LoaderFunction, useRouteData } from "remix";
-import firebase from "firebase";
+import { Outlet } from "react-router";
+import { json, Link, LoaderFunction, useRouteData } from "remix";
+import { getServers } from "../utils/firebase";
 
 export const loader: LoaderFunction = async () => {
-  const snapshot = await firebase
-    .firestore()
-    .doc("guilds/734593378162835526")
-    .get();
-  return await snapshot.data;
+  const servers = await getServers();
+  return json(servers);
 };
 export default function Servers() {
-  const data = useRouteData();
-  console.log(data);
+  const servers: Server[] = useRouteData();
+  console.log(servers);
   return (
     <div>
-      <h2>hello world</h2>
+      <aside>
+        {servers.map((server) => (
+          <div key={server.id}>
+            <Link to={server.id}>{server.name}</Link>
+          </div>
+        ))}
+      </aside>
+      <Outlet />
     </div>
   );
 }

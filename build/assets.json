@@ -1,9 +1,9 @@
 {
-  "version": "1b8b103a",
+  "version": "7b4e1410",
   "entry": {
-    "module": "/build/entry.client-EG24NOEE.js",
+    "module": "/build/entry.client-LWV33EJ3.js",
     "imports": [
-      "/build/_shared/chunk-7IBBT256.js",
+      "/build/_shared/chunk-XTBIVTYR.js",
       "/build/_shared/chunk-DOM5QJLA.js"
     ]
   },
@@ -11,10 +11,7 @@
     "root": {
       "id": "root",
       "path": "/",
-      "module": "/build/root-7OFRM5DI.js",
-      "imports": [
-        "/build/_shared/chunk-DOK4MDSW.js"
-      ],
+      "module": "/build/root-4W3R4ZJ4.js",
       "hasAction": false,
       "hasLoader": false
     },
@@ -32,7 +29,7 @@
       "parentId": "root",
       "path": "/",
       "caseSensitive": false,
-      "module": "/build/routes/index-BWL664EG.js",
+      "module": "/build/routes/index-7LI5FHFE.js",
       "hasAction": false,
       "hasLoader": true
     },
@@ -41,10 +38,28 @@
       "parentId": "root",
       "path": "servers",
       "caseSensitive": false,
-      "module": "/build/routes/servers-OLNILSBD.js",
+      "module": "/build/routes/servers-OHQAULSN.js",
       "hasAction": false,
       "hasLoader": true
+    },
+    "routes/servers/$server": {
+      "id": "routes/servers/$server",
+      "parentId": "routes/servers",
+      "path": ":server",
+      "caseSensitive": false,
+      "module": "/build/routes/servers/$server-PKLQAJBU.js",
+      "hasAction": false,
+      "hasLoader": true
+    },
+    "routes/servers/index": {
+      "id": "routes/servers/index",
+      "parentId": "routes/servers",
+      "path": "/",
+      "caseSensitive": false,
+      "module": "/build/routes/servers/index-LVSBOHUM.js",
+      "hasAction": false,
+      "hasLoader": false
     }
   },
-  "url": "/build/manifest-1B8B103A.js"
+  "url": "/build/manifest-7B4E1410.js"
 }
