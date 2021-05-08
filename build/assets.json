@@ -1,5 +1,5 @@
 {
-  "version": "7917251b",
+  "version": "47176f54",
   "entry": {
     "module": "/build/entry.client-XKKF3EYK.js",
     "imports": [
@@ -38,7 +38,7 @@
       "parentId": "root",
       "path": "servers",
       "caseSensitive": false,
-      "module": "/build/routes/servers-C2OYAWSA.js",
+      "module": "/build/routes/servers-LIFIBERN.js",
       "hasAction": false,
       "hasLoader": true
     },
@@ -61,5 +61,5 @@
       "hasLoader": false
     }
   },
-  "url": "/build/manifest-7917251B.js"
+  "url": "/build/manifest-47176F54.js"
 }

@@ -266,7 +266,7 @@ function Servers() {
 }
 function meta3() {
   return {
-    title: "Discord Servers",
+    title: "Dungeon Night Servers",
     description: "List of discord servers supported by the bot."
   };
 }

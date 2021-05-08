@@ -1,7 +1,13 @@
 import { Outlet } from "react-router";
 import { NavLink } from "react-router-dom";
-import { json, Link, LoaderFunction, useRouteData, LinksFunction } from "remix";
-import { Server } from "../types/Server";
+import {
+  json,
+  Link,
+  LoaderFunction,
+  useRouteData,
+  LinksFunction,
+  MetaFunction,
+} from "remix";
 import { getLfgToonNames, getServers } from "../utils/firebase";
 import serverStyleUrl from "../styles/server.css";
 
@@ -43,7 +49,7 @@ export default function Servers() {
 
 export function meta() {
   return {
-    title: "Discord Servers",
+    title: "Dungeon Night Servers",
     description: "List of discord servers supported by the bot.",
   };
 }

@@ -1,4 +1,10 @@
-import { json, LoaderFunction, useRouteData, LinksFunction } from "remix";
+import {
+  json,
+  LoaderFunction,
+  useRouteData,
+  LinksFunction,
+  MetaFunction,
+} from "remix";
 import ToonRow from "../../components/Toon";
 import { Group } from "../../types/Group";
 import { Toon } from "../../types/Toon";
