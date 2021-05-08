@@ -1,23 +1,41 @@
 import { Outlet } from "react-router";
-import { json, Link, LoaderFunction, useRouteData } from "remix";
-import { getServers } from "../utils/firebase";
+import { NavLink } from "react-router-dom";
+import { json, Link, LoaderFunction, useRouteData, LinksFunction } from "remix";
+import { Server } from "../types/Server";
+import { getLfgToonNames, getServers } from "../utils/firebase";
+import serverStyleUrl from "../styles/server.css";
+
+export let links: LinksFunction = () => {
+  return [{ rel: "stylesheet", href: serverStyleUrl }];
+};
 
 export const loader: LoaderFunction = async () => {
   const servers = await getServers();
-  return json(servers);
+  const enhancedServers = await Promise.all(
+    servers.map(async (server) => {
+      const lfgToonNames = await getLfgToonNames(server.id);
+      return {
+        ...server,
+        lfgToonNames,
+      };
+    })
+  );
+  return json(enhancedServers);
 };
 export default function Servers() {
-  const servers: Server[] = useRouteData();
-  console.log(servers);
+  const servers: any[] = useRouteData();
   return (
-    <div>
-      <aside>
+    <div className="server-page">
+      <nav className="server-nav">
         {servers.map((server) => (
-          <div key={server.id}>
-            <Link to={server.id}>{server.name}</Link>
-          </div>
+          <NavLink key={server.id} to={server.id} className="server-nav-link">
+            <div className="server-name">{server.name || server.id}</div>
+            <div className="server-lfg">
+              {server?.lfgToonNames?.length || 0}
+            </div>
+          </NavLink>
         ))}
-      </aside>
+      </nav>
       <Outlet />
     </div>
   );

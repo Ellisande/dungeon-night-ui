@@ -1,0 +1,18 @@
+.groups {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-column-gap: 5px;
+}
+
+.server-nav {
+  text-decoration: none;
+}
+
+.server-nav hover {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.server-page {
+  display: grid;
+  grid-template-columns: 10vw auto;
+}

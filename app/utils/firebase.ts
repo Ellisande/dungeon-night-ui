@@ -1,7 +1,30 @@
+import { Group } from "./../types/Group.d";
 import type Firebase from "firebase";
 import firebase from "firebase";
 import { config } from "../../firebaseConfig";
 let lazyDb: Firebase.firestore.Firestore;
+
+async function getGroups(serverId: string) {
+  const groupsRef = await getDb()
+    .collection(`/guilds/${serverId}/groups`)
+    .get();
+  const groups: Group[] = [];
+  await groupsRef.forEach((doc) => {
+    const data = doc.data() || {};
+    groups.push({
+      id: doc.id,
+      ...data,
+    } as Group);
+  });
+  return groups;
+}
+
+async function getToon(serverId: string, toonName: string) {
+  const toonSnapshot = await getDb()
+    .doc(`/guilds/${serverId}/toons/${toonName}`)
+    .get();
+  return toonSnapshot.exists ? toonSnapshot.data() || {} : {};
+}
 
 async function getLfgToonNames(serverId: string) {
   const toonNameSnapshot = await getDb()
@@ -24,13 +47,6 @@ async function getServers() {
   return servers;
 }
 
-async function getToon() {
-  const toonRef = getDb().doc("/guilds/734593378162835526/toons/aranjah");
-  const toonSnapshot = await toonRef.get();
-  const toon = toonSnapshot.exists ? toonSnapshot.data() || {} : {};
-  return toon;
-}
-
 function getDb(): Firebase.firestore.Firestore {
   if (!lazyDb) {
     lazyDb = getFirebase().firestore();
@@ -50,4 +66,4 @@ function getFirebase() {
   return lazyFirebase;
 }
 
-export { getToon, getServers, getLfgToonNames };
+export { getToon, getServers, getLfgToonNames, getGroups };

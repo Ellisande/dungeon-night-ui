@@ -1,0 +1,22 @@
+:root {
+  --color-normal: green;
+  --color-heroic: blue;
+  --color-mythic: purple;
+  --color-legendary: orange;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+footer {
+  text-align: center;
+  color: #ccc;
+  padding-top: 80px;
+}

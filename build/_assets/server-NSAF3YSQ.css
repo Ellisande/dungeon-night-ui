@@ -1,0 +1,22 @@
+.groups {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-column-gap: 5px;
+}
+
+.server-nav {
+  display: flex;
+  justify-content: space-between;
+  text-decoration: none;
+  background-color: green;
+  height: 100vh;
+}
+
+.server-nav:hover > div {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.server-page {
+  display: grid;
+  grid-template-columns: 15vw auto;
+}

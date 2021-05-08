@@ -1,0 +1,6 @@
+.group {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.2fr;
+  grid-template-rows: 1em repeat(1.5em);
+  width: 15em;
+}

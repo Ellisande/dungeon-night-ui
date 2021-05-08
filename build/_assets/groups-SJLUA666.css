@@ -1,0 +1,13 @@
+.group {
+  display: grid;
+  grid-template-columns: 5em 0.5em 3em;
+  grid-template-rows: 1em repeat(5, 1.5em);
+  width: em;
+  border: 1px solid black;
+  padding: 3px;
+  border-radius: 7px;
+}
+
+.toon-name {
+  text-transform: capitalize;
+}

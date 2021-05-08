@@ -1,0 +1,9 @@
+.toon {
+  display: grid;
+  grid-template-columns: 10em 1em 10em;
+}
+
+.toon-role {
+  width: 1rem;
+  height: 1rem;
+}
