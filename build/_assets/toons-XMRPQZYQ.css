@@ -6,7 +6,7 @@
 
 .toon-editable {
   display: grid;
-  grid-template-columns: 7em repeat(3, 1em) 4em 3rem 5rem 5rem;
+  grid-template-columns: 1fr repeat(3, 0.1fr) 2fr 5rem;
   width: 17em;
 }
 
@@ -41,5 +41,4 @@ input.toon-roles {
 
 input.toon-ilevel {
   width: 2em;
-  justify-self: center;
 }

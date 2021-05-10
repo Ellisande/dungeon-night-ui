@@ -1,5 +1,5 @@
 {
-  "version": "47176f54",
+  "version": "5b17d8d2",
   "entry": {
     "module": "/build/entry.client-XKKF3EYK.js",
     "imports": [
@@ -33,12 +33,28 @@
       "hasAction": false,
       "hasLoader": true
     },
+    "routes/login": {
+      "id": "routes/login",
+      "parentId": "root",
+      "path": "login",
+      "caseSensitive": false,
+      "module": "/build/routes/login-BWPC3LKU.js",
+      "imports": [
+        "/build/_shared/chunk-TAQIYHMM.js",
+        "/build/_shared/chunk-MG3P3MHY.js"
+      ],
+      "hasAction": true,
+      "hasLoader": false
+    },
     "routes/servers": {
       "id": "routes/servers",
       "parentId": "root",
       "path": "servers",
       "caseSensitive": false,
-      "module": "/build/routes/servers-LIFIBERN.js",
+      "module": "/build/routes/servers-XDC3A44K.js",
+      "imports": [
+        "/build/_shared/chunk-MG3P3MHY.js"
+      ],
       "hasAction": false,
       "hasLoader": true
     },
@@ -47,8 +63,11 @@
       "parentId": "routes/servers",
       "path": ":server",
       "caseSensitive": false,
-      "module": "/build/routes/servers/$server-H3AZUZIU.js",
-      "hasAction": false,
+      "module": "/build/routes/servers/$server-IRJ5P4PB.js",
+      "imports": [
+        "/build/_shared/chunk-TAQIYHMM.js"
+      ],
+      "hasAction": true,
       "hasLoader": true
     },
     "routes/servers/index": {
@@ -61,5 +80,5 @@
       "hasLoader": false
     }
   },
-  "url": "/build/manifest-47176F54.js"
+  "url": "/build/manifest-5B17D8D2.js"
 }

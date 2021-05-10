@@ -12,7 +12,7 @@ export const Authenticated = ({ children }: Props) => {
   if (!userId) {
     return (
       <div>
-        <button>Sign In</button>
+        <button onClick={signIn}>Sign In</button>
       </div>
     );
   }

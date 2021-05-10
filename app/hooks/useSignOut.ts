@@ -1,8 +1,8 @@
-import { useFirebaseAuth } from "../context/firebaseAuthContext";
 import { useEffect } from "react";
+import { getAuth } from "../utils/firebase";
 
 export const useSignOut = () => {
-  const auth = useFirebaseAuth();
+  const auth = getAuth();
   const user = auth && auth.currentUser;
   return useEffect(() => {
     if (!auth || !user) {

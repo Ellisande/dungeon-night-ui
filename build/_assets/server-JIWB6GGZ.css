@@ -57,7 +57,6 @@ h2 {
   margin: 5px 1px 5px 1px;
 }
 
-.characters {
+.current-character {
   flex-grow: 5;
-  justify-self: flex-end;
 }

@@ -1,7 +1,7 @@
-import { useFirebaseAuth } from "../context/firebaseAuthContext";
+import { getAuth } from "../utils/firebase";
 
 export const useSignIn = () => {
-  const auth = useFirebaseAuth();
+  const auth = getAuth();
   if (auth) {
     return () =>
       // @ts-ignore

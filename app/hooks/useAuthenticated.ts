@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
-import { useFirebaseAuth } from "../context/firebaseAuthContext";
+import { getAuth } from "../utils/firebase";
+import { sessionStorage } from "../utils/session";
 
 export const useAuthenticated = () => {
-  const auth = useFirebaseAuth();
+  const auth = getAuth();
 
   const [userId, setUserId] = useState<string | undefined>(undefined);
   useEffect(() => {
     if (!auth) {
       return () => {};
     }
-    return auth.onAuthStateChanged(user => {
+    return auth.onAuthStateChanged((user) => {
       setUserId(user ? user.uid : undefined);
     });
   });

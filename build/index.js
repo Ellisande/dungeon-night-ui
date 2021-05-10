@@ -150,17 +150,17 @@ function Index() {
   }, "Check out the docs"), " to get started."), /* @__PURE__ */ React.createElement("p", null, "Message from the loader: ", data.message));
 }
 
-// route-module:/Users/ellisande/dev/source/dungeon-night-ui/app/routes/servers.tsx
-var servers_exports = {};
-__export(servers_exports, {
-  default: () => Servers,
-  links: () => links3,
-  loader: () => loader2,
-  meta: () => meta3
+// route-module:/Users/ellisande/dev/source/dungeon-night-ui/app/routes/login.tsx
+var login_exports = {};
+__export(login_exports, {
+  action: () => action,
+  default: () => login_default
 });
-var import_react_router = __toModule(require("react-router"));
-var import_react_router_dom2 = __toModule(require("react-router-dom"));
-var import_remix4 = __toModule(require("remix"));
+var React2 = __toModule(require("react"));
+var import_remix5 = __toModule(require("remix"));
+
+// app/hooks/useAuthenticated.ts
+var import_react = __toModule(require("react"));
 
 // app/utils/firebase.ts
 var import_firebase = __toModule(require("firebase"));
@@ -178,6 +178,36 @@ var config = {
 
 // app/utils/firebase.ts
 var lazyDb;
+async function updateToon(serverId, toonName, userId, toon) {
+  const toonUpdate = (oldState) => {
+    if (oldState.userId != userId) {
+      throw {
+        type: "Unauthorized",
+        message: "You cannot update a character you do not own"
+      };
+    }
+    return __objSpread(__objSpread({}, oldState), toon);
+  };
+  return update(getDb())(`/guilds/${serverId}/toons/${toonName}`)(toonUpdate);
+}
+var update = (db) => (docPath) => (updateFunction) => db.runTransaction((t) => {
+  const docRef = db.doc(docPath);
+  return t.get(docRef).then((oldState) => {
+    const newState = updateFunction(oldState.data());
+    if (oldState === newState) {
+      return;
+    }
+    return t.set(docRef, newState);
+  });
+});
+async function getToonsForUser(serverId, ownerId) {
+  const toonsRef = await getDb().collection(`/guilds/${serverId}/toons`).where("userId", "==", ownerId).get();
+  const toons = [];
+  await toonsRef.forEach((doc) => {
+    toons.push(__objSpread({}, doc.data()));
+  });
+  return toons;
+}
 async function getGroups(serverId) {
   const groupsRef = await getDb().collection(`/guilds/${serverId}/groups`).get();
   const groups = [];
@@ -227,26 +257,136 @@ function getFirebase() {
   }
   return lazyFirebase;
 }
+var lazyAuth;
+function getAuth() {
+  if (!lazyAuth) {
+    lazyAuth = getFirebase().auth();
+  }
+  return lazyAuth;
+}
+
+// app/hooks/useAuthenticated.ts
+var useAuthenticated = () => {
+  const auth = getAuth();
+  const [userId, setUserId] = (0, import_react.useState)(void 0);
+  (0, import_react.useEffect)(() => {
+    if (!auth) {
+      return () => {
+      };
+    }
+    return auth.onAuthStateChanged((user) => {
+      setUserId(user ? user.uid : void 0);
+    });
+  });
+  return userId;
+};
+
+// app/hooks/useSignIn.ts
+var useSignIn = () => {
+  const auth = getAuth();
+  if (auth) {
+    return () => auth.signInWithRedirect(new auth.app.firebase_.auth.GoogleAuthProvider());
+  }
+  return () => {
+  };
+};
+
+// app/utils/session.ts
+var import_remix4 = __toModule(require("remix"));
+var secret = "not-at-all-secret";
+if (process.env.SESSION_SECRET) {
+  secret = process.env.SESSION_SECRET;
+} else if (process.env.NODE_ENV === "production") {
+  throw new Error("Must set SESSION_SECRET");
+}
+var {
+  getSession,
+  commitSession,
+  destroySession
+} = (0, import_remix4.createCookieSessionStorage)({
+  cookie: {
+    name: "__session",
+    secrets: [secret],
+    sameSite: "lax",
+    path: "/"
+  }
+});
+var getUserSession = async (request) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  return {
+    userId: session.get("userId")
+  };
+};
+var requireUserSession = async (request, next) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  const userId = session.get("userId");
+  const userSession = userId ? {userId} : null;
+  if (!userSession) {
+    return (0, import_remix4.redirect)("/login");
+  }
+  return next(userSession);
+};
+
+// route-module:/Users/ellisande/dev/source/dungeon-night-ui/app/routes/login.tsx
+var action = async ({request}) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  const {userId} = Object.fromEntries(new URLSearchParams(await request.text()));
+  session.set("userId", userId);
+  return (0, import_remix5.redirect)("/servers", {
+    headers: {
+      "Set-Cookie": await commitSession(session)
+    }
+  });
+};
+function Login() {
+  const data = (0, import_remix5.useRouteData)();
+  const userId = useAuthenticated();
+  const signIn = useSignIn();
+  return /* @__PURE__ */ React2.createElement("div", null, !userId && /* @__PURE__ */ React2.createElement("button", {
+    onClick: signIn
+  }, "Sign In"), userId && /* @__PURE__ */ React2.createElement("form", {
+    method: "post"
+  }, /* @__PURE__ */ React2.createElement("div", null, "Signed in With Google!"), /* @__PURE__ */ React2.createElement("input", {
+    type: "hidden",
+    value: userId,
+    name: "userId"
+  }), /* @__PURE__ */ React2.createElement("button", null, "Continue")));
+}
+var login_default = Login;
+
+// route-module:/Users/ellisande/dev/source/dungeon-night-ui/app/routes/servers.tsx
+var servers_exports = {};
+__export(servers_exports, {
+  default: () => Servers,
+  links: () => links3,
+  loader: () => loader2,
+  meta: () => meta3
+});
+var import_react_router = __toModule(require("react-router"));
+var import_react_router_dom2 = __toModule(require("react-router-dom"));
+var import_remix6 = __toModule(require("remix"));
 
 // app/styles/server.css
-var server_default = "/build/_assets/server-WO76FJ4H.css";
+var server_default = "/build/_assets/server-SOP6DJXK.css";
 
 // route-module:/Users/ellisande/dev/source/dungeon-night-ui/app/routes/servers.tsx
 var links3 = () => {
   return [{rel: "stylesheet", href: server_default}];
 };
-var loader2 = async () => {
-  const servers = await getServers();
-  const enhancedServers = await Promise.all(servers.map(async (server) => {
-    const lfgToonNames = await getLfgToonNames(server.id);
-    return __objSpread(__objSpread({}, server), {
-      lfgToonNames
-    });
-  }));
-  return (0, import_remix4.json)(enhancedServers);
+var loader2 = async ({request}) => {
+  return requireUserSession(request, async (user) => {
+    const servers = await getServers();
+    const enhancedServers = await Promise.all(servers.map(async (server) => {
+      const lfgToonNames = await getLfgToonNames(server.id);
+      return __objSpread(__objSpread({}, server), {
+        lfgToonNames
+      });
+    }));
+    return (0, import_remix6.json)({enhancedServers, user});
+  });
 };
 function Servers() {
-  const servers = (0, import_remix4.useRouteData)();
+  const {enhancedServers: servers, user} = (0, import_remix6.useRouteData)();
   return /* @__PURE__ */ React.createElement("div", {
     className: "server-page"
   }, /* @__PURE__ */ React.createElement("nav", {
@@ -274,11 +414,12 @@ function meta3() {
 // route-module:/Users/ellisande/dev/source/dungeon-night-ui/app/routes/servers/$server.tsx
 var server_exports = {};
 __export(server_exports, {
+  action: () => action2,
   default: () => ServerView,
   links: () => links4,
   loader: () => loader3
 });
-var import_remix5 = __toModule(require("remix"));
+var import_remix7 = __toModule(require("remix"));
 
 // app/components/Difficulty.tsx
 function Difficulty(props) {
@@ -299,21 +440,7 @@ function Difficulty(props) {
   }, difficulty);
 }
 
-// app/components/Toon.tsx
-function HealerIcon() {
-  return /* @__PURE__ */ React.createElement("svg", {
-    xmlns: "http://www.w3.org/2000/svg",
-    className: "h-6 w-6 toon-role healer",
-    fill: "none",
-    viewBox: "0 0 24 24",
-    stroke: "currentColor"
-  }, /* @__PURE__ */ React.createElement("path", {
-    strokeLinecap: "round",
-    strokeLinejoin: "round",
-    strokeWidth: 2,
-    d: "M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-  }));
-}
+// app/components/DpsIcon.tsx
 function DpsIcon() {
   return /* @__PURE__ */ React.createElement("svg", {
     xmlns: "http://www.w3.org/2000/svg",
@@ -333,6 +460,24 @@ function DpsIcon() {
     d: "M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"
   }));
 }
+
+// app/components/HealerIcon.tsx
+function HealerIcon() {
+  return /* @__PURE__ */ React.createElement("svg", {
+    xmlns: "http://www.w3.org/2000/svg",
+    className: "h-6 w-6 toon-role healer",
+    fill: "none",
+    viewBox: "0 0 24 24",
+    stroke: "currentColor"
+  }, /* @__PURE__ */ React.createElement("path", {
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    strokeWidth: 2,
+    d: "M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+  }));
+}
+
+// app/components/TankIcon.tsx
 function TankIcon() {
   return /* @__PURE__ */ React.createElement("svg", {
     xmlns: "http://www.w3.org/2000/svg",
@@ -347,6 +492,8 @@ function TankIcon() {
     d: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
   }));
 }
+
+// app/components/Toon.tsx
 var iconMap = {
   tank: TankIcon,
   dps: DpsIcon,
@@ -395,7 +542,7 @@ function ToonRow(props) {
 }
 
 // app/styles/toons.css
-var toons_default = "/build/_assets/toons-CRULBANU.css";
+var toons_default = "/build/_assets/toons-LPZDM4DX.css";
 
 // app/styles/groups.css
 var groups_default = "/build/_assets/groups-JI4FIP2L.css";
@@ -424,6 +571,118 @@ function GroupContainer(props) {
   }))));
 }
 
+// app/components/EditableToon.tsx
+var import_react2 = __toModule(require("react"));
+
+// app/utils/toonUtils.ts
+function getMaxDifficulty2(difficulties) {
+  const mythicPlus = difficulties.filter((difficulty) => /m\d+/.test(difficulty));
+  if (mythicPlus.length > 0) {
+    const mPlusNumbers = mythicPlus.map((difficulty) => difficulty.replace(/m/i, "")).map(Number);
+    return "m" + Math.max(...mPlusNumbers);
+  }
+  if (difficulties.includes("mythic")) {
+    return "mythic";
+  }
+  if (difficulties.includes("heroic")) {
+    return "heroic";
+  }
+  return "normal";
+}
+
+// app/components/EditableToon.tsx
+var difficultyMap = [
+  "normal",
+  "heroic",
+  "mythic",
+  "m2",
+  "m3",
+  "m4",
+  "m5",
+  "m6",
+  "m7",
+  "m8",
+  "m9",
+  "m10",
+  "m11",
+  "m12",
+  "m13",
+  "m14",
+  "m15",
+  "m16",
+  "m17",
+  "m18",
+  "m19",
+  "m20"
+];
+function EditableToonRow(props) {
+  const {toon, className, serverId} = props;
+  const {name} = toon;
+  const maxDifficulty = getMaxDifficulty2(toon.difficulties);
+  const maxDifficultyValue = difficultyMap.indexOf(maxDifficulty);
+  const sanitizedMaxDifficultyValue = maxDifficultyValue == -1 ? 0 : maxDifficultyValue;
+  const [difficultyValue, setDifficultyValue] = (0, import_react2.useState)(sanitizedMaxDifficultyValue);
+  const difficultyText = difficultyMap[difficultyValue] || "normal";
+  return /* @__PURE__ */ React.createElement("form", {
+    className: `toon-editable ${className}`,
+    method: "post"
+  }, /* @__PURE__ */ React.createElement("div", {
+    className: "toon-name"
+  }, toon.name), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("input", {
+    className: "toon-roles",
+    type: "checkbox",
+    name: "tank",
+    id: `${name}-tank`,
+    defaultChecked: toon.roles.includes("tank")
+  }), /* @__PURE__ */ React.createElement("label", {
+    htmlFor: `${name}-tank`,
+    className: "role-icon-label"
+  }, /* @__PURE__ */ React.createElement(TankIcon, null))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("input", {
+    className: "toon-roles",
+    type: "checkbox",
+    name: "dps",
+    id: `${name}-dps`,
+    defaultChecked: toon.roles.includes("dps")
+  }), /* @__PURE__ */ React.createElement("label", {
+    htmlFor: `${name}-dps`,
+    className: "role-icon-label"
+  }, /* @__PURE__ */ React.createElement(DpsIcon, null))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("input", {
+    className: "toon-roles",
+    type: "checkbox",
+    name: "healer",
+    id: `${name}-healer`,
+    defaultChecked: toon.roles.includes("healer")
+  }), /* @__PURE__ */ React.createElement("label", {
+    htmlFor: `${name}-healer`,
+    className: "role-icon-label"
+  }, /* @__PURE__ */ React.createElement(HealerIcon, null))), /* @__PURE__ */ React.createElement("input", {
+    name: "iLevel",
+    className: "toon-ilevel",
+    type: "text",
+    defaultValue: Number(toon.iLevel),
+    min: 0,
+    max: 235
+  }), /* @__PURE__ */ React.createElement("input", {
+    type: "hidden",
+    name: "name",
+    value: toon.name
+  }), /* @__PURE__ */ React.createElement("input", {
+    type: "hidden",
+    name: "server-id",
+    value: serverId
+  }), /* @__PURE__ */ React.createElement("span", null, difficultyText), /* @__PURE__ */ React.createElement("input", {
+    type: "range",
+    min: "0",
+    max: "21",
+    value: difficultyValue,
+    className: "maxDifficulty",
+    id: "maxDifficulty",
+    onChange: (e) => setDifficultyValue(Number(e.target.value))
+  }), /* @__PURE__ */ React.createElement("button", {
+    type: "submit"
+  }, "Update"));
+}
+
 // route-module:/Users/ellisande/dev/source/dungeon-night-ui/app/routes/servers/$server.tsx
 var links4 = () => {
   return [
@@ -431,20 +690,46 @@ var links4 = () => {
     {rel: "stylesheet", href: groups_default}
   ];
 };
-var loader3 = async ({params}) => {
-  const serverId = params.server;
-  const lfgToonNames = await getLfgToonNames(serverId);
-  const groups = await getGroups(serverId);
-  const toons = await Promise.all(lfgToonNames.map(async (name) => {
-    return await getToon(serverId, name);
-  }));
-  return (0, import_remix5.json)({lfgToonNames, groups, toons});
+var loader3 = async ({params, request}) => {
+  return requireUserSession(request, async (session) => {
+    const userId = session.userId;
+    const serverId = params.server;
+    const lfgToonNames = await getLfgToonNames(serverId);
+    const groups = await getGroups(serverId);
+    const toons = await Promise.all(lfgToonNames.map(async (name) => {
+      return await getToon(serverId, name);
+    }));
+    const userToons = await getToonsForUser(serverId, userId);
+    return (0, import_remix7.json)({lfgToonNames, groups, toons, userToons, serverId});
+  });
+};
+var action2 = async ({request, context}) => {
+  let body = new URLSearchParams(await request.text());
+  const {userId} = await getUserSession(request);
+  const name = body.get("name");
+  const tank = body.get("tank") ? "tank" : null;
+  const dps = body.get("dps") ? "dps" : null;
+  const healer = body.get("healer") ? "healer" : null;
+  const iLevel = Number(body.get("iLevel"));
+  const serverId = body.get("server-id");
+  const roles = [tank, dps, healer].filter((i) => i).map((i) => i);
+  const toonUpdates = {
+    roles,
+    iLevel
+  };
+  try {
+    await updateToon(serverId, name, userId, toonUpdates);
+  } catch {
+    (0, import_remix7.redirect)(`/servers/${serverId}`);
+  }
+  return (0, import_remix7.redirect)(`/servers/${serverId}`);
 };
 var toonFinderFunc = (toons) => (toonName) => {
   return toons.find((toon) => toon.name == toonName) || {};
 };
 function ServerView() {
-  const {lfgToonNames, groups, toons} = (0, import_remix5.useRouteData)();
+  const {lfgToonNames, groups, toons, userToons, serverId} = (0, import_remix7.useRouteData)();
+  const userId = useAuthenticated();
   const toonFinder = toonFinderFunc(toons);
   const allLfgToons = lfgToonNames.map(toonFinder);
   const enhancedGroups = groups.map((group) => __objSpread(__objSpread({}, group), {
@@ -465,7 +750,13 @@ function ServerView() {
     key: toon.name,
     showMaxDifficulty: true,
     showILevel: true
-  }))));
+  }))), /* @__PURE__ */ React.createElement("h2", null, "Your Characters"), (userToons == null ? void 0 : userToons.length) > 0 && /* @__PURE__ */ React.createElement("div", {
+    className: "characters"
+  }, userToons.map((toon) => /* @__PURE__ */ React.createElement(EditableToonRow, {
+    key: toon.name,
+    toon,
+    serverId
+  }))), !userToons || !userToons.length && "You have no characters on this server");
 }
 
 // route-module:/Users/ellisande/dev/source/dungeon-night-ui/app/routes/servers/index.tsx
@@ -501,6 +792,13 @@ var routes = {
     path: "/",
     caseSensitive: false,
     module: routes_exports
+  },
+  "routes/login": {
+    id: "routes/login",
+    parentId: "root",
+    path: "login",
+    caseSensitive: false,
+    module: login_exports
   },
   "routes/servers": {
     id: "routes/servers",

@@ -2,7 +2,57 @@ import { Group } from "./../types/Group.d";
 import type Firebase from "firebase";
 import firebase from "firebase";
 import { config } from "../../firebaseConfig";
+import { Toon } from "../types/Toon";
 let lazyDb: Firebase.firestore.Firestore;
+
+async function updateToon(
+  serverId: string,
+  toonName: string,
+  userId: string,
+  toon: Partial<Toon>
+) {
+  const toonUpdate = (oldState: any) => {
+    if (oldState.userId != userId) {
+      throw {
+        type: "Unauthorized",
+        message: "You cannot update a character you do not own",
+      };
+    }
+    return {
+      ...oldState,
+      ...toon,
+    };
+  };
+  return update(getDb())(`/guilds/${serverId}/toons/${toonName}`)(toonUpdate);
+}
+
+const update = (db: Firebase.firestore.Firestore) => (docPath: string) => (
+  updateFunction: any
+): any =>
+  db.runTransaction((t) => {
+    const docRef = db.doc(docPath);
+    return t.get(docRef).then((oldState) => {
+      const newState = updateFunction(oldState.data());
+      if (oldState === newState) {
+        return;
+      }
+      return t.set(docRef, newState);
+    });
+  });
+
+async function getToonsForUser(serverId: string, ownerId: string) {
+  const toonsRef = await getDb()
+    .collection(`/guilds/${serverId}/toons`)
+    .where("userId", "==", ownerId)
+    .get();
+  const toons: Toon[] = [];
+  await toonsRef.forEach((doc) => {
+    toons.push({
+      ...doc.data(),
+    } as Toon);
+  });
+  return toons;
+}
 
 async function getGroups(serverId: string) {
   const groupsRef = await getDb()
@@ -66,4 +116,20 @@ function getFirebase() {
   return lazyFirebase;
 }
 
-export { getToon, getServers, getLfgToonNames, getGroups };
+let lazyAuth: Firebase.auth.Auth;
+function getAuth() {
+  if (!lazyAuth) {
+    lazyAuth = getFirebase().auth();
+  }
+  return lazyAuth;
+}
+
+export {
+  getAuth,
+  getToon,
+  getServers,
+  getLfgToonNames,
+  getGroups,
+  getToonsForUser,
+  updateToon,
+};
