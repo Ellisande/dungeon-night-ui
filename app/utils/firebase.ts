@@ -6,6 +6,33 @@ import { Toon } from "../types/Toon";
 import { Server } from "../types/Server";
 let lazyDb: Firebase.firestore.Firestore;
 
+async function claimToon(serverId: string, userId: string, toonName: string) {
+  const updateToon = (oldState: Toon) => {
+    if (oldState?.userId) {
+      return;
+    }
+    return {
+      ...oldState,
+      userId,
+    };
+  };
+  return update(getDb())(`/guilds/${serverId}/toons/${toonName}`)(updateToon);
+}
+
+async function getUnclaimedToons(serverId: string) {
+  const toonsRef = await getDb().collection(`/guilds/${serverId}/toons`).get();
+  const toons: Toon[] = [];
+  await toonsRef.forEach((doc) => {
+    if (doc?.data()?.userId) {
+      return;
+    }
+    toons.push({
+      ...doc.data(),
+    } as Toon);
+  });
+  return toons;
+}
+
 async function addToLfg(serverId: string, toonName: string) {
   const listUpdate = (oldState: any = { toonNames: [] }) => {
     if (oldState.toonNames.includes(toonName)) {
@@ -160,4 +187,6 @@ export {
   updateToon,
   addToLfg,
   removeFromLfg,
+  getUnclaimedToons,
+  claimToon,
 };

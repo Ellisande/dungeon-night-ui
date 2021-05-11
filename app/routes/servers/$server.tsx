@@ -3,9 +3,9 @@ import {
   LoaderFunction,
   useRouteData,
   LinksFunction,
-  MetaFunction,
   ActionFunction,
   redirect,
+  Link,
 } from "remix";
 import ToonRow from "../../components/Toon";
 import { Group } from "../../types/Group";
@@ -16,7 +16,6 @@ import {
   getToon,
   getToonsForUser,
   updateToon,
-  getAuth,
   addToLfg,
   removeFromLfg,
 } from "../../utils/firebase";
@@ -24,7 +23,6 @@ import toonStylesUrl from "../../styles/toons.css";
 import groupStylesUrl from "../../styles/groups.css";
 import GroupContainer from "../../components/Group";
 import EditableToonRow from "../../components/EditableToon";
-import { Authenticated } from "../../components/Authenticated";
 import { useAuthenticated } from "../../hooks/useAuthenticated";
 import { getUserSession, requireUserSession } from "../../utils/session";
 
@@ -146,6 +144,7 @@ export default function ServerView() {
       )}
       {!userToons ||
         (!userToons.length && "You have no characters on this server")}
+      <Link to={`claim`}>Claim New Character</Link>
     </div>
   );
 }
