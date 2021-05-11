@@ -1,5 +1,5 @@
 import { createRef, useState } from "react";
-import { ActionFunction, redirect } from "remix";
+import { ActionFunction, Form, redirect } from "remix";
 import type { Role, Toon } from "../types/Toon";
 import { getMaxDifficulty } from "../utils/toonUtils";
 import Difficulty from "./Difficulty";
@@ -11,6 +11,7 @@ type Props = {
   toon: Toon;
   serverId: string;
   className?: string;
+  lfg?: boolean;
 };
 
 const iconMap = {
@@ -18,11 +19,6 @@ const iconMap = {
   dps: DpsIcon,
   healer: HealerIcon,
 };
-
-function roleMapper(role: Role) {
-  const Icon = iconMap[role];
-  return <Icon key={role} />;
-}
 
 const difficultyMap = [
   "normal",
@@ -50,7 +46,7 @@ const difficultyMap = [
 ];
 
 export default function EditableToonRow(props: Props) {
-  const { toon, className, serverId } = props;
+  const { toon, className, serverId, lfg = false } = props;
   const { name } = toon;
   const maxDifficulty = getMaxDifficulty(toon.difficulties);
   const maxDifficultyValue = difficultyMap.indexOf(maxDifficulty);
@@ -61,65 +57,83 @@ export default function EditableToonRow(props: Props) {
   );
   const difficultyText = difficultyMap[difficultyValue] || "normal";
   return (
-    <form className={`toon-editable ${className}`} method="post">
-      <div className="toon-name">{toon.name}</div>
-      <div>
+    <div className="toon-edit-layout">
+      <form className={`toon-editable ${className}`} method="post">
+        <div className="toon-name">{toon.name}</div>
+        <div>
+          <input
+            className="toon-roles"
+            type="checkbox"
+            name="tank"
+            id={`${name}-tank`}
+            defaultChecked={toon.roles.includes("tank")}
+          />
+          <label htmlFor={`${name}-tank`} className="role-icon-label">
+            <TankIcon />
+          </label>
+        </div>
+        <div>
+          <input
+            className="toon-roles"
+            type="checkbox"
+            name="dps"
+            id={`${name}-dps`}
+            defaultChecked={toon.roles.includes("dps")}
+          />
+          <label htmlFor={`${name}-dps`} className="role-icon-label">
+            <DpsIcon />
+          </label>
+        </div>
+        <div>
+          <input
+            className="toon-roles"
+            type="checkbox"
+            name="healer"
+            id={`${name}-healer`}
+            defaultChecked={toon.roles.includes("healer")}
+          />
+          <label htmlFor={`${name}-healer`} className="role-icon-label">
+            <HealerIcon />
+          </label>
+        </div>
         <input
-          className="toon-roles"
-          type="checkbox"
-          name="tank"
-          id={`${name}-tank`}
-          defaultChecked={toon.roles.includes("tank")}
+          name="iLevel"
+          className="toon-ilevel"
+          type="text"
+          defaultValue={Number(toon.iLevel)}
+          min={0}
+          max={235}
         />
-        <label htmlFor={`${name}-tank`} className="role-icon-label">
-          <TankIcon />
-        </label>
-      </div>
-      <div>
+        <input type="hidden" name="name" value={toon.name} />
+        <input type="hidden" name="server-id" value={serverId} />
+        <span>{difficultyText}</span>
         <input
-          className="toon-roles"
-          type="checkbox"
-          name="dps"
-          id={`${name}-dps`}
-          defaultChecked={toon.roles.includes("dps")}
+          type="range"
+          min="0"
+          max="21"
+          value={difficultyValue}
+          className="maxDifficulty"
+          id="maxDifficulty"
+          onChange={(e) => setDifficultyValue(Number(e.target.value))}
         />
-        <label htmlFor={`${name}-dps`} className="role-icon-label">
-          <DpsIcon />
-        </label>
-      </div>
-      <div>
-        <input
-          className="toon-roles"
-          type="checkbox"
-          name="healer"
-          id={`${name}-healer`}
-          defaultChecked={toon.roles.includes("healer")}
-        />
-        <label htmlFor={`${name}-healer`} className="role-icon-label">
-          <HealerIcon />
-        </label>
-      </div>
-      <input
-        name="iLevel"
-        className="toon-ilevel"
-        type="text"
-        defaultValue={Number(toon.iLevel)}
-        min={0}
-        max={235}
-      />
-      <input type="hidden" name="name" value={toon.name} />
-      <input type="hidden" name="server-id" value={serverId} />
-      <span>{difficultyText}</span>
-      <input
-        type="range"
-        min="0"
-        max="21"
-        value={difficultyValue}
-        className="maxDifficulty"
-        id="maxDifficulty"
-        onChange={(e) => setDifficultyValue(Number(e.target.value))}
-      />
-      <button type="submit">Update</button>
-    </form>
+        <button type="submit">Update</button>
+      </form>
+      {!lfg && (
+        <Form method="put">
+          <input type="hidden" name="server-id" value={serverId} />
+
+          <input type="hidden" name="name" value={toon.name} />
+          <button type="submit">Go LFG</button>
+        </Form>
+      )}
+      {lfg && (
+        <Form method="delete">
+          <input type="hidden" name="server-id" value={serverId} />
+
+          <input type="hidden" name="name" value={toon.name} />
+          <button type="submit">Leave LFG</button>
+        </Form>
+      )}
+    </div>
   );
 }

@@ -6,9 +6,8 @@
 
 .toon-edit-layout {
   display: grid;
-  grid-template-columns: 27em auto;
+  grid-template-columns: auto auto;
   justify-items: start;
-  gap: 0;
 }
 
 .toon-editable {

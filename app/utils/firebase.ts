@@ -3,7 +3,32 @@ import type Firebase from "firebase";
 import firebase from "firebase";
 import { config } from "../../firebaseConfig";
 import { Toon } from "../types/Toon";
+import { Server } from "../types/Server";
 let lazyDb: Firebase.firestore.Firestore;
+
+async function addToLfg(serverId: string, toonName: string) {
+  const listUpdate = (oldState: any = { toonNames: [] }) => {
+    if (oldState.toonNames.includes(toonName)) {
+      return oldState;
+    }
+    return {
+      toonNames: [...oldState.toonNames, toonName],
+    };
+  };
+  return update(getDb())(`/guilds/${serverId}/lfg/toonNames`)(listUpdate);
+}
+
+async function removeFromLfg(serverId: string, toonName: string) {
+  const listUpdate = (oldState: any = { toonNames: [] }) => {
+    if (!oldState.toonNames.includes(toonName)) {
+      return oldState;
+    }
+    return {
+      toonNames: oldState.toonNames.filter((name: string) => name != toonName),
+    };
+  };
+  return update(getDb())(`/guilds/${serverId}/lfg/toonNames`)(listUpdate);
+}
 
 async function updateToon(
   serverId: string,
@@ -26,19 +51,20 @@ async function updateToon(
   return update(getDb())(`/guilds/${serverId}/toons/${toonName}`)(toonUpdate);
 }
 
-const update = (db: Firebase.firestore.Firestore) => (docPath: string) => (
-  updateFunction: any
-): any =>
-  db.runTransaction((t) => {
-    const docRef = db.doc(docPath);
-    return t.get(docRef).then((oldState) => {
-      const newState = updateFunction(oldState.data());
-      if (oldState === newState) {
-        return;
-      }
-      return t.set(docRef, newState);
+const update =
+  (db: Firebase.firestore.Firestore) =>
+  (docPath: string) =>
+  (updateFunction: any): any =>
+    db.runTransaction((t) => {
+      const docRef = db.doc(docPath);
+      return t.get(docRef).then((oldState) => {
+        const newState = updateFunction(oldState.data());
+        if (oldState === newState) {
+          return;
+        }
+        return t.set(docRef, newState);
+      });
     });
-  });
 
 async function getToonsForUser(serverId: string, ownerId: string) {
   const toonsRef = await getDb()
@@ -132,4 +158,6 @@ export {
   getGroups,
   getToonsForUser,
   updateToon,
+  addToLfg,
+  removeFromLfg,
 };

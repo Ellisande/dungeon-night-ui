@@ -6,7 +6,7 @@
 
 .toon-edit-layout {
   display: grid;
-  grid-template-columns: 27em auto;
+  grid-template-columns: 20em auto;
   justify-items: start;
   gap: 0;
 }

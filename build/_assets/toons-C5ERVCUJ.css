@@ -4,13 +4,6 @@
   width: 17em;
 }
 
-.toon-edit-layout {
-  display: grid;
-  grid-template-columns: 27em auto;
-  justify-items: start;
-  gap: 0;
-}
-
 .toon-editable {
   display: grid;
   grid-template-columns: 7em repeat(3, 1em) 4em 3rem 5rem 5rem;

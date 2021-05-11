@@ -1,0 +1,39 @@
+:root {
+  --color-normal: rgb(0, 107, 0);
+  --color-heroic: rgb(3, 3, 161);
+  --color-mythic: purple;
+  --color-legendary: rgb(175, 114, 2);
+}
+
+.normal {
+  color: var(--color-normal);
+}
+
+.heroic {
+  color: var(--color-heroic);
+}
+
+.mythic {
+  color: var(--color-mythic);
+}
+
+.legendary {
+  color: var(--color-legendary);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(224, 224, 224);
+}
+
+footer {
+  text-align: center;
+  color: #ccc;
+  padding-top: 80px;
+}

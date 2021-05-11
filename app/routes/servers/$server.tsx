@@ -17,6 +17,8 @@ import {
   getToonsForUser,
   updateToon,
   getAuth,
+  addToLfg,
+  removeFromLfg,
 } from "../../utils/firebase";
 import toonStylesUrl from "../../styles/toons.css";
 import groupStylesUrl from "../../styles/groups.css";
@@ -55,25 +57,40 @@ export let loader: LoaderFunction = async ({ params, request }) => {
 
 export let action: ActionFunction = async ({ request, context }) => {
   let body = new URLSearchParams(await request.text());
-  const { userId } = await getUserSession(request);
-  const name = body.get("name") as string;
-  const tank = body.get("tank") ? "tank" : null;
-  const dps = body.get("dps") ? "dps" : null;
-  const healer = body.get("healer") ? "healer" : null;
-  const iLevel = Number(body.get("iLevel"));
   const serverId = body.get("server-id") as string;
-  const roles: Role[] = [tank, dps, healer]
-    .filter((i) => i)
-    .map((i) => i as Role);
-  const toonUpdates = {
-    roles,
-    iLevel,
-  };
-  try {
-    await updateToon(serverId, name, userId, toonUpdates);
-  } catch {
-    redirect(`/servers/${serverId}`);
+
+  if (request.method.toLowerCase() == "post") {
+    const { userId } = await getUserSession(request);
+    const name = body.get("name") as string;
+    const tank = body.get("tank") ? "tank" : null;
+    const dps = body.get("dps") ? "dps" : null;
+    const healer = body.get("healer") ? "healer" : null;
+    const iLevel = Number(body.get("iLevel"));
+    const serverId = body.get("server-id") as string;
+    const roles: Role[] = [tank, dps, healer]
+      .filter((i) => i)
+      .map((i) => i as Role);
+    const toonUpdates = {
+      roles,
+      iLevel,
+    };
+    try {
+      await updateToon(serverId, name, userId, toonUpdates);
+    } catch {
+      redirect(`/servers/${serverId}`);
+    }
   }
+  if (request.method.toLowerCase() == "put") {
+    const toonName = body.get("name") as string;
+
+    await addToLfg(serverId, toonName);
+  }
+  if (request.method.toLowerCase() == "delete") {
+    const toonName = body.get("name") as string;
+
+    await removeFromLfg(serverId, toonName);
+  }
+
   return redirect(`/servers/${serverId}`);
 };
 
@@ -118,7 +135,12 @@ export default function ServerView() {
       {userToons?.length > 0 && (
         <div className="characters">
           {userToons.map((toon: Toon) => (
-            <EditableToonRow key={toon.name} toon={toon} serverId={serverId} />
+            <EditableToonRow
+              key={toon.name}
+              toon={toon}
+              serverId={serverId}
+              lfg={lfgToonNames.includes(toon.name)}
+            />
           ))}
         </div>
       )}
