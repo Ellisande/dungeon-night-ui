@@ -5,3 +5,4 @@ node_modules
 /public/build
 firebaseConfig.ts
 /build
+firebaseCert.json
