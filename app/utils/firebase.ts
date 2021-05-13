@@ -1,10 +1,17 @@
 import { Group } from "./../types/Group.d";
-import type Firebase from "firebase";
-import firebase from "firebase";
+import admin from "firebase-admin";
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
 import { config } from "../../firebaseConfig";
 import { Toon } from "../types/Toon";
 import { Server } from "../types/Server";
-let lazyDb: Firebase.firestore.Firestore;
+
+let lazyDb: FirebaseFirestore.Firestore;
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(config);
+}
 
 async function claimToon(serverId: string, userId: string, toonName: string) {
   const updateToon = (oldState: Toon) => {
@@ -79,7 +86,7 @@ async function updateToon(
 }
 
 const update =
-  (db: Firebase.firestore.Firestore) =>
+  (db: FirebaseFirestore.Firestore) =>
   (docPath: string) =>
   (updateFunction: any): any =>
     db.runTransaction((t) => {
@@ -150,32 +157,49 @@ async function getServers() {
   return servers;
 }
 
-function getDb(): Firebase.firestore.Firestore {
+function getDb(): FirebaseFirestore.Firestore {
   if (!lazyDb) {
-    lazyDb = getFirebase().firestore();
+    lazyDb = getAdmin().firestore();
   }
   return lazyDb;
 }
 
-let lazyFirebase: Firebase.app.App;
-function getFirebase() {
-  if (firebase.apps.length) {
-    lazyFirebase = firebase.app();
+let lazyAdmin: typeof admin;
+function getAdmin() {
+  if (admin.apps.length) {
+    lazyAdmin = admin;
   }
-  if (!lazyFirebase) {
-    firebase.initializeApp(config);
-    lazyFirebase = firebase.app();
+  if (!lazyAdmin) {
+    const serviceAccountKey = getServiceKey();
+    // if (!serviceAccountKey) {
+    //   throw new Error(
+    //     "FIREBASE_SERVICE_ACCOUNT_KEY environment variable is required to do auth"
+    //   );
+    // }
+    // admin.initializeApp({
+    //   credential: admin.credential.cert(serviceAccountKey),
+    // });
+    lazyAdmin = admin;
   }
-  return lazyFirebase;
+  return lazyAdmin;
 }
 
-let lazyAuth: Firebase.auth.Auth;
+let lazyAuth: admin.auth.Auth;
 function getAuth() {
   if (!lazyAuth) {
-    lazyAuth = getFirebase().auth();
+    lazyAuth = getAdmin().auth();
   }
   return lazyAuth;
 }
+
+let getServiceKey = () => {
+  if (process.env.firebase_cert) {
+    return process.env.firebase_cert;
+  }
+  return "";
+  // const certString = fs.readFileSync("../../firebaseCert.json", "utf8");
+  // return JSON.parse(certString as string);
+};
 
 export {
   getAuth,
