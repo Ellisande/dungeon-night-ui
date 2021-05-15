@@ -1,13 +1,11 @@
 import { Group } from "./../types/Group.d";
+import type Firebase from "firebase";
+import firebase from "firebase";
 import admin from "firebase-admin";
-import firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/firestore";
 import { config } from "../../firebaseConfig";
 import { Toon } from "../types/Toon";
 import { Server } from "../types/Server";
-
-let lazyDb: FirebaseFirestore.Firestore;
+import cert from "../../firebaseCert.json";
 
 if (!firebase.apps.length) {
   firebase.initializeApp(config);
@@ -86,7 +84,7 @@ async function updateToon(
 }
 
 const update =
-  (db: FirebaseFirestore.Firestore) =>
+  (db: Firebase.firestore.Firestore) =>
   (docPath: string) =>
   (updateFunction: any): any =>
     db.runTransaction((t) => {
@@ -157,11 +155,24 @@ async function getServers() {
   return servers;
 }
 
-function getDb(): FirebaseFirestore.Firestore {
+let lazyDb: FirebaseFirestore.Firestore;
+
+function getDb() {
   if (!lazyDb) {
     lazyDb = getAdmin().firestore();
   }
   return lazyDb;
+}
+
+let lazyFirebase: Firebase.app.App;
+function getFirebase() {
+  if (firebase.apps.length) {
+    lazyFirebase = firebase.app();
+  }
+  if (!lazyFirebase) {
+    lazyFirebase = firebase.app();
+  }
+  return lazyFirebase;
 }
 
 let lazyAdmin: typeof admin;
@@ -170,39 +181,42 @@ function getAdmin() {
     lazyAdmin = admin;
   }
   if (!lazyAdmin) {
-    const serviceAccountKey = getServiceKey();
-    // if (!serviceAccountKey) {
-    //   throw new Error(
-    //     "FIREBASE_SERVICE_ACCOUNT_KEY environment variable is required to do auth"
-    //   );
-    // }
-    // admin.initializeApp({
-    //   credential: admin.credential.cert(serviceAccountKey),
-    // });
+    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    if (!serviceAccountKey && !cert) {
+      throw new Error(
+        "FIREBASE_SERVICE_ACCOUNT_KEY environment variable is required to do auth"
+      );
+    }
+    const serviceAccount = cert;
+
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
     lazyAdmin = admin;
   }
+
   return lazyAdmin;
 }
 
-let lazyAuth: admin.auth.Auth;
+let lazyAuth: Firebase.auth.Auth;
 function getAuth() {
   if (!lazyAuth) {
-    lazyAuth = getAdmin().auth();
+    lazyAuth = getFirebase().auth();
   }
   return lazyAuth;
 }
 
-let getServiceKey = () => {
-  if (process.env.firebase_cert) {
-    return process.env.firebase_cert;
+let lazyAdminAuth: admin.auth.Auth;
+function getAdminAuth() {
+  if (!lazyAdminAuth) {
+    lazyAdminAuth = getAdmin().auth();
   }
-  return "";
-  // const certString = fs.readFileSync("../../firebaseCert.json", "utf8");
-  // return JSON.parse(certString as string);
-};
+  return lazyAdminAuth;
+}
 
 export {
   getAuth,
+  getAdminAuth,
   getToon,
   getServers,
   getLfgToonNames,
