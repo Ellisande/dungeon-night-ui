@@ -84,7 +84,7 @@ async function updateToon(
 }
 
 const update =
-  (db: Firebase.firestore.Firestore) =>
+  (db: FirebaseFirestore.Firestore) =>
   (docPath: string) =>
   (updateFunction: any): any =>
     db.runTransaction((t) => {
