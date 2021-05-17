@@ -6,7 +6,7 @@
 
 .toon-edit-layout {
   display: grid;
-  grid-template-columns: 20em auto;
+  grid-template-columns: 20.5em auto;
   justify-items: start;
   gap: 0;
 }
@@ -68,4 +68,18 @@ input.toon-ilevel {
 .stop {
   color: white;
   background-color: var(--color-stop);
+}
+
+.roles-header {
+  grid-column: span 3;
+  text-align: center;
+}
+
+.difficulty-header {
+  grid-column: span 2;
+  text-align: center;
+}
+
+.ilevel-header {
+  text-align: center;
 }

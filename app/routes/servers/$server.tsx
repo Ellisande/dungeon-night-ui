@@ -26,6 +26,8 @@ import EditableToonRow from "../../components/EditableToon";
 import { useAuthenticated } from "../../hooks/useAuthenticated";
 import { getUserSession, requireUserSession } from "../../utils/session";
 import { getAllDifficultiesLessThan } from "../../utils/toonUtils";
+import ToonHeaderRow from "../../components/ToonHeaders";
+import EditableToonHeaderRow from "../../components/EditableToonHeader";
 
 export let links: LinksFunction = () => {
   return [
@@ -138,6 +140,7 @@ export default function ServerView() {
       </div>
       <h2>Waiting: {waitingToons.length}</h2>
       <div className="lfg-toons">
+        <ToonHeaderRow showMaxDifficulty showILevel />
         {waitingToons.map((toon: Toon) => (
           <ToonRow toon={toon} key={toon.name} showMaxDifficulty showILevel />
         ))}
@@ -145,6 +148,7 @@ export default function ServerView() {
       <h2>Your Characters</h2>
       {userToons?.length > 0 && (
         <div className="characters">
+          <EditableToonHeaderRow />
           {userToons.map((toon: Toon) => (
             <EditableToonRow
               key={toon.name}
