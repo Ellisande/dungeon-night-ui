@@ -36,6 +36,7 @@
 
 .toon-name {
   text-transform: capitalize;
+  position: relative;
 }
 
 .toon-roles:not(:checked) + .role-icon-label > * {
@@ -82,4 +83,12 @@ input.toon-ilevel {
 
 .ilevel-header {
   text-align: center;
+}
+
+.toon-name.lfg-name::after {
+  content: "[lfg]";
+  font-size: 0.8rem;
+  color: var(--color-start);
+  position: absolute;
+  top: 50;
 }

@@ -59,10 +59,11 @@ export default function EditableToonRow(props: Props) {
     sanitizedMaxDifficultyValue
   );
   const difficultyText = difficultyMap[difficultyValue] || "normal";
+  const lfgStyle = lfg ? "lfg-name" : "";
   return (
     <div className="toon-edit-layout">
       <Form className={`toon-editable ${className}`} method="post">
-        <div className="toon-name">{toon.name}</div>
+        <div className={`toon-name ${lfgStyle}`}>{toon.name}</div>
         <div>
           <input
             className="toon-roles"

@@ -140,10 +140,13 @@ export default function ServerView() {
       </div>
       <h2>Waiting: {waitingToons.length}</h2>
       <div className="lfg-toons">
-        <ToonHeaderRow showMaxDifficulty showILevel />
+        {waitingToons.length > 0 && (
+          <ToonHeaderRow showMaxDifficulty showILevel />
+        )}
         {waitingToons.map((toon: Toon) => (
           <ToonRow toon={toon} key={toon.name} showMaxDifficulty showILevel />
         ))}
+        {!waitingToons?.length && <div>No toons currently lfg</div>}
       </div>
       <h2>Your Characters</h2>
       {userToons?.length > 0 && (
