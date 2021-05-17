@@ -12,15 +12,10 @@ import {
 } from "firebase/firestore";
 import { Auth, getAuth as getFirebaseAuth } from "firebase/auth";
 // import * as admin from "firebase-admin";
-import { config as firebaseConfig } from "../../firebaseConfig";
+import { config } from "../../firebaseConfig";
 import { Toon } from "../types/Toon";
 import { Server } from "../types/Server";
 import cert from "../../firebaseCert.json";
-
-const config =
-  Object.keys(firebaseConfig).length > 0
-    ? firebaseConfig
-    : JSON.parse(process.env.FIREBASE_CONFIG as string);
 
 if (!getApps().length) {
   initializeApp(config);
