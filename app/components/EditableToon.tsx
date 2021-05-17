@@ -5,7 +5,10 @@ import { getMaxDifficulty } from "../utils/toonUtils";
 import Difficulty from "./Difficulty";
 import DpsIcon from "./DpsIcon";
 import HealerIcon from "./HealerIcon";
+import LfgIcon from "./LfgIcon";
+import StopIcon from "./StopIcon";
 import TankIcon from "./TankIcon";
+import UpdateIcon from "./UpdateIcon";
 
 type Props = {
   toon: Toon;
@@ -106,7 +109,7 @@ export default function EditableToonRow(props: Props) {
         />
         <input type="hidden" name="name" value={toon.name} />
         <input type="hidden" name="server-id" value={serverId} />
-        <span>{difficultyText}</span>
+        <span>{difficultyText.substring(0, 3)}</span>
         <input
           type="range"
           min="0"
@@ -117,14 +120,18 @@ export default function EditableToonRow(props: Props) {
           name="maxDifficulty"
           onChange={(e) => setDifficultyValue(Number(e.target.value))}
         />
-        <button type="submit">Update</button>
+        <button type="submit" className="button update">
+          <UpdateIcon />
+        </button>
       </Form>
       {!lfg && (
         <Form method="put">
           <input type="hidden" name="server-id" value={serverId} />
 
           <input type="hidden" name="name" value={toon.name} />
-          <button type="submit">Go LFG</button>
+          <button type="submit" className="button lfg">
+            <LfgIcon />
+          </button>
         </Form>
       )}
       {lfg && (
@@ -132,7 +139,9 @@ export default function EditableToonRow(props: Props) {
           <input type="hidden" name="server-id" value={serverId} />
 
           <input type="hidden" name="name" value={toon.name} />
-          <button type="submit">Leave LFG</button>
+          <button type="submit" className="button stop">
+            <StopIcon />
+          </button>
         </Form>
       )}
     </div>

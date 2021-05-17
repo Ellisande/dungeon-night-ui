@@ -1,0 +1,30 @@
+.button.login {
+  background-color: var(--color-start);
+}
+
+.button.continue {
+  background-color: var(--color-start);
+}
+
+.button.login,
+.button.continue {
+  color: white;
+  font-size: 3em;
+  grid-column: 2;
+  grid-row: 2;
+  max-height: 3em;
+}
+
+.with-google {
+  grid-column: 2;
+  font-size: 3em;
+  align-self: center;
+  justify-self: center;
+  text-align: center;
+}
+
+.login-layout {
+  display: grid;
+  grid-template-columns: 33% 33% 33%;
+  grid-template-rows: 33vh 33vh 33vh;
+}

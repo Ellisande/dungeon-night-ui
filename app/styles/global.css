@@ -3,6 +3,10 @@
   --color-heroic: rgb(3, 3, 161);
   --color-mythic: purple;
   --color-legendary: rgb(175, 114, 2);
+
+  --color-info: rgb(103, 103, 172);
+  --color-start: rgb(101, 139, 101);
+  --color-stop: rgb(165, 114, 114);
 }
 
 .normal {
@@ -30,10 +34,23 @@ body {
   margin: 0;
   padding: 0;
   background-color: rgb(224, 224, 224);
+  font-size: 1.5em;
 }
 
 footer {
   text-align: center;
   color: #ccc;
   padding-top: 80px;
+}
+
+.button {
+  border-radius: 10px;
+  padding: 1.5px 6px;
+  min-width: 3rem;
+  cursor: pointer;
+}
+
+.button .icon {
+  height: 1.5em;
+  width: 1.5em;
 }

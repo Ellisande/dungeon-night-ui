@@ -157,7 +157,9 @@ export default function ServerView() {
       )}
       {!userToons ||
         (!userToons.length && "You have no characters on this server")}
-      <Link to={`claim`}>Claim New Character</Link>
+      <Link to={`claim`} className="claim button">
+        Claim Another Character
+      </Link>
     </div>
   );
 }
