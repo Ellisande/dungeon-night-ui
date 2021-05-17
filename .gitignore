@@ -3,5 +3,6 @@ node_modules
 /.cache
 /server/build
 /public/build
+firebaseConfig.ts
 /build
 firebaseCert.json
