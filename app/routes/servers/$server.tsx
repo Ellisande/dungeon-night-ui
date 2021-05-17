@@ -25,6 +25,7 @@ import GroupContainer from "../../components/Group";
 import EditableToonRow from "../../components/EditableToon";
 import { useAuthenticated } from "../../hooks/useAuthenticated";
 import { getUserSession, requireUserSession } from "../../utils/session";
+import { getAllDifficultiesLessThan } from "../../utils/toonUtils";
 
 export let links: LinksFunction = () => {
   return [
@@ -37,14 +38,14 @@ export let loader: LoaderFunction = async ({ params, request }) => {
   return requireUserSession(request, async (session) => {
     const userId = session.userId;
     const serverId = params.server;
-    const lfgToonNames: string[] = await getLfgToonNames(serverId);
+    const lfgToonNames: string[] = (await getLfgToonNames(serverId)) || [];
     const groups = await getGroups(serverId);
     const toons = await Promise.all(
       lfgToonNames.map(async (name) => {
         return await getToon(serverId, name);
       })
     );
-    const userToons = await getToonsForUser(serverId, userId);
+    const userToons = (await getToonsForUser(serverId, userId)) || [];
     return json({ lfgToonNames, groups, toons, userToons, serverId });
   });
 
@@ -68,9 +69,12 @@ export let action: ActionFunction = async ({ request, context }) => {
     const roles: Role[] = [tank, dps, healer]
       .filter((i) => i)
       .map((i) => i as Role);
+    const maxDifficulty = Number(body.get("maxDifficulty"));
+    const difficulties = getAllDifficultiesLessThan(maxDifficulty);
     const toonUpdates = {
       roles,
       iLevel,
+      difficulties,
     };
     try {
       await updateToon(serverId, name, userId, toonUpdates);
@@ -93,26 +97,35 @@ export let action: ActionFunction = async ({ request, context }) => {
 };
 
 const toonFinderFunc = (toons: Toon[]) => (toonName: string) => {
-  return toons.find((toon: Toon) => toon.name == toonName) || {};
+  return toons.find((toon: Toon) => toon.name == toonName);
 };
 
 type EnhancedGroup = Group & {
-  toons: Toon[];
+  toons: (Toon | string)[];
 };
 
 export default function ServerView() {
-  const { lfgToonNames, groups, toons, userToons, serverId } = useRouteData();
-  const userId = useAuthenticated();
+  const {
+    lfgToonNames = [],
+    groups = [],
+    toons = [],
+    userToons = [],
+    serverId,
+  } = useRouteData();
+
   const toonFinder = toonFinderFunc(toons);
   const allLfgToons = lfgToonNames.map(toonFinder);
   const enhancedGroups: EnhancedGroup[] = groups.map((group: Group) => ({
     ...group,
-    toons: group.toonNames.map(toonFinder),
+    toons: group.toonNames.map((name) => toonFinder(name) || name),
   }));
-  const groupedToons = enhancedGroups.flatMap((group) => group.toons);
+  const groupedToons = enhancedGroups.flatMap((group) =>
+    group.toons.filter((i) => typeof i == "string")
+  );
   const waitingToons = allLfgToons.filter(
     (toon: Toon) => !groupedToons.includes(toon)
   );
+
   return (
     <div>
       <h2>Groups: {groups.length}</h2>

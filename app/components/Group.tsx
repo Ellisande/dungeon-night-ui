@@ -5,7 +5,15 @@ import ToonRow from "./Toon";
 
 type Props = {
   group: Group;
-  toons?: Toon[];
+  toons?: (Toon | string)[];
+};
+
+const toonOrNameMapper = (toonOrName: Toon | string) => {
+  if (typeof toonOrName == "string") {
+    return <div className="toon-name">{toonOrName}</div>;
+  }
+  const toon = toonOrName as Toon;
+  return <ToonRow key={toon.name} toon={toon} />;
 };
 
 export default function GroupContainer(props: Props) {
@@ -24,8 +32,7 @@ export default function GroupContainer(props: Props) {
               {toonName}
             </div>
           ))}
-        {toons.length > 0 &&
-          toons.map((toon) => <ToonRow key={toon.name} toon={toon} />)}
+        {toons.length > 0 && toons.map(toonOrNameMapper)}
       </div>
     </div>
   );

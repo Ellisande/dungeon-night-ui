@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { getAuth } from "../utils/firebase";
-import { sessionStorage } from "../utils/session";
 
 export const useAuthenticated = () => {
   const auth = getAuth();

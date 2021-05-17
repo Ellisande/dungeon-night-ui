@@ -1,14 +1,30 @@
 import { Group } from "./../types/Group.d";
-import type Firebase from "firebase";
-import firebase from "firebase";
-import admin from "firebase-admin";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import {
+  collection,
+  getFirestore,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  doc,
+  runTransaction,
+} from "firebase/firestore";
+import { Auth, getAuth as getFirebaseAuth } from "firebase/auth";
+// import * as admin from "firebase-admin";
 import { config } from "../../firebaseConfig";
 import { Toon } from "../types/Toon";
 import { Server } from "../types/Server";
 import cert from "../../firebaseCert.json";
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(config);
+if (!getApps().length) {
+  initializeApp(config);
+}
+
+function initialize() {
+  if (!getApps().length) {
+    initializeApp(config);
+  }
 }
 
 async function claimToon(serverId: string, userId: string, toonName: string) {
@@ -21,13 +37,15 @@ async function claimToon(serverId: string, userId: string, toonName: string) {
       userId,
     };
   };
-  return update(getDb())(`/guilds/${serverId}/toons/${toonName}`)(updateToon);
+  return await update(`/guilds/${serverId}/toons/${toonName}`)(updateToon);
 }
 
 async function getUnclaimedToons(serverId: string) {
-  const toonsRef = await getDb().collection(`/guilds/${serverId}/toons`).get();
+  const toonsRef = await getDocs(
+    collection(getDb(), `/guilds/${serverId}/toons`)
+  );
   const toons: Toon[] = [];
-  await toonsRef.forEach((doc) => {
+  await toonsRef.forEach((doc: any) => {
     if (doc?.data()?.userId) {
       return;
     }
@@ -47,7 +65,7 @@ async function addToLfg(serverId: string, toonName: string) {
       toonNames: [...oldState.toonNames, toonName],
     };
   };
-  return update(getDb())(`/guilds/${serverId}/lfg/toonNames`)(listUpdate);
+  return await update(`/guilds/${serverId}/lfg/toonNames`)(listUpdate);
 }
 
 async function removeFromLfg(serverId: string, toonName: string) {
@@ -59,7 +77,7 @@ async function removeFromLfg(serverId: string, toonName: string) {
       toonNames: oldState.toonNames.filter((name: string) => name != toonName),
     };
   };
-  return update(getDb())(`/guilds/${serverId}/lfg/toonNames`)(listUpdate);
+  return await update(`/guilds/${serverId}/lfg/toonNames`)(listUpdate);
 }
 
 async function updateToon(
@@ -80,16 +98,16 @@ async function updateToon(
       ...toon,
     };
   };
-  return update(getDb())(`/guilds/${serverId}/toons/${toonName}`)(toonUpdate);
+  return await update(`/guilds/${serverId}/toons/${toonName}`)(toonUpdate);
 }
 
 const update =
-  (db: FirebaseFirestore.Firestore) =>
   (docPath: string) =>
-  (updateFunction: any): any =>
-    db.runTransaction((t) => {
-      const docRef = db.doc(docPath);
-      return t.get(docRef).then((oldState) => {
+  async (updateFunction: any): Promise<any> => {
+    const db = getDb();
+    await runTransaction(db, async (t) => {
+      const docRef = doc(db, docPath);
+      return t.get(docRef).then((oldState: any) => {
         const newState = updateFunction(oldState.data());
         if (oldState === newState) {
           return;
@@ -97,14 +115,16 @@ const update =
         return t.set(docRef, newState);
       });
     });
+  };
 
 async function getToonsForUser(serverId: string, ownerId: string) {
-  const toonsRef = await getDb()
-    .collection(`/guilds/${serverId}/toons`)
-    .where("userId", "==", ownerId)
-    .get();
+  const toonsQuery = query(
+    collection(getDb(), `/guilds/${serverId}/toons`),
+    where("userId", "==", ownerId)
+  );
+  const toonsRef = await getDocs(toonsQuery);
   const toons: Toon[] = [];
-  await toonsRef.forEach((doc) => {
+  await toonsRef.forEach((doc: any) => {
     toons.push({
       ...doc.data(),
     } as Toon);
@@ -113,11 +133,11 @@ async function getToonsForUser(serverId: string, ownerId: string) {
 }
 
 async function getGroups(serverId: string) {
-  const groupsRef = await getDb()
-    .collection(`/guilds/${serverId}/groups`)
-    .get();
+  const groupsRef = await getDocs(
+    collection(getDb(), `/guilds/${serverId}/groups`)
+  );
   const groups: Group[] = [];
-  await groupsRef.forEach((doc) => {
+  await groupsRef.forEach((doc: any) => {
     const data = doc.data() || {};
     groups.push({
       id: doc.id,
@@ -128,24 +148,24 @@ async function getGroups(serverId: string) {
 }
 
 async function getToon(serverId: string, toonName: string) {
-  const toonSnapshot = await getDb()
-    .doc(`/guilds/${serverId}/toons/${toonName}`)
-    .get();
-  return toonSnapshot.exists ? toonSnapshot.data() || {} : {};
+  const toonSnapshot = await getDoc(
+    doc(getDb(), `/guilds/${serverId}/toons/${toonName}`)
+  );
+  return toonSnapshot.exists() ? toonSnapshot.data() || {} : {};
 }
 
 async function getLfgToonNames(serverId: string) {
-  const toonNameSnapshot = await getDb()
-    .doc(`/guilds/${serverId}/lfg/toonNames`)
-    .get();
-  return toonNameSnapshot.exists ? toonNameSnapshot?.data()?.toonNames : [];
+  const toonNameSnapshot = await getDoc(
+    doc(getDb(), `/guilds/${serverId}/lfg/toonNames`)
+  );
+  return toonNameSnapshot.exists() ? toonNameSnapshot?.data()?.toonNames : [];
 }
 
 async function getServers() {
-  const serversRef = getDb().collection("/guilds");
-  const serverSnapshot = await serversRef.get();
+  const serversRef = collection(getDb(), "/guilds");
+  const serverSnapshot = await getDocs(serversRef);
   const servers: Server[] = [];
-  await serverSnapshot.forEach((doc) => {
+  await serverSnapshot.forEach((doc: any) => {
     const data = doc.data() || {};
     servers.push({
       id: doc.id,
@@ -155,68 +175,54 @@ async function getServers() {
   return servers;
 }
 
-let lazyDb: FirebaseFirestore.Firestore;
-
 function getDb() {
-  if (!lazyDb) {
-    lazyDb = getAdmin().firestore();
-  }
-  return lazyDb;
+  initialize();
+  return getFirestore(getApp());
 }
 
-let lazyFirebase: Firebase.app.App;
-function getFirebase() {
-  if (firebase.apps.length) {
-    lazyFirebase = firebase.app();
-  }
-  if (!lazyFirebase) {
-    lazyFirebase = firebase.app();
-  }
-  return lazyFirebase;
-}
+// let lazyAdmin: typeof admin;
+// function getAdmin() {
+//   if (admin.apps.length) {
+//     lazyAdmin = admin;
+//   }
+//   if (!lazyAdmin) {
+//     const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+//     if (!serviceAccountKey && !cert) {
+//       throw new Error(
+//         "FIREBASE_SERVICE_ACCOUNT_KEY environment variable is required to do auth"
+//       );
+//     }
+//     const serviceAccount = cert;
 
-let lazyAdmin: typeof admin;
-function getAdmin() {
-  if (admin.apps.length) {
-    lazyAdmin = admin;
-  }
-  if (!lazyAdmin) {
-    const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-    if (!serviceAccountKey && !cert) {
-      throw new Error(
-        "FIREBASE_SERVICE_ACCOUNT_KEY environment variable is required to do auth"
-      );
-    }
-    const serviceAccount = cert;
+//     admin.initializeApp({
+//       credential: admin.credential.cert(serviceAccount),
+//     });
+//     lazyAdmin = admin;
+//   }
 
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-    lazyAdmin = admin;
-  }
+//   return lazyAdmin;
+// }
 
-  return lazyAdmin;
-}
+// let lazyAdminAuth: admin.auth.Auth;
+// function getAdminAuth() {
+//   if (!lazyAdminAuth) {
+//     lazyAdminAuth = getAdmin().auth();
+//   }
+//   return lazyAdminAuth;
+// }
 
-let lazyAuth: Firebase.auth.Auth;
+let lazyAuth: Auth;
 function getAuth() {
+  initialize();
   if (!lazyAuth) {
-    lazyAuth = getFirebase().auth();
+    lazyAuth = getFirebaseAuth(getApp());
   }
   return lazyAuth;
 }
 
-let lazyAdminAuth: admin.auth.Auth;
-function getAdminAuth() {
-  if (!lazyAdminAuth) {
-    lazyAdminAuth = getAdmin().auth();
-  }
-  return lazyAdminAuth;
-}
-
 export {
   getAuth,
-  getAdminAuth,
+  // getAdminAuth,
   getToon,
   getServers,
   getLfgToonNames,

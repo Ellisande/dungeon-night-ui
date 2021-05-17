@@ -1,8 +1,14 @@
 import type { LinksFunction } from "remix";
 import { Meta, Links, Scripts, useRouteData, LiveReload } from "remix";
 import { Outlet } from "react-router-dom";
+import { getApp, getApps, initializeApp } from "firebase/app";
+
+if (!getApps()?.length) {
+  initializeApp(config);
+}
 
 import stylesUrl from "./styles/global.css";
+import { config } from "../firebaseConfig";
 
 export let links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];

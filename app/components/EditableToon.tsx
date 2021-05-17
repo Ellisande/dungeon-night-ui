@@ -58,7 +58,7 @@ export default function EditableToonRow(props: Props) {
   const difficultyText = difficultyMap[difficultyValue] || "normal";
   return (
     <div className="toon-edit-layout">
-      <form className={`toon-editable ${className}`} method="post">
+      <Form className={`toon-editable ${className}`} method="post">
         <div className="toon-name">{toon.name}</div>
         <div>
           <input
@@ -114,10 +114,11 @@ export default function EditableToonRow(props: Props) {
           value={difficultyValue}
           className="maxDifficulty"
           id="maxDifficulty"
+          name="maxDifficulty"
           onChange={(e) => setDifficultyValue(Number(e.target.value))}
         />
         <button type="submit">Update</button>
-      </form>
+      </Form>
       {!lfg && (
         <Form method="put">
           <input type="hidden" name="server-id" value={serverId} />

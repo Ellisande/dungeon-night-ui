@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { getAuth } from "../utils/firebase";
+import { signOut, getAuth } from "firebase/auth";
 
 export const useSignOut = () => {
   const auth = getAuth();
-  const user = auth && auth.currentUser;
+
   return useEffect(() => {
-    if (!auth || !user) {
+    if (!auth) {
       return () => {};
     }
-    auth.signOut();
-  }, [auth, user]);
+    signOut(auth);
+  }, [auth]);
 };
