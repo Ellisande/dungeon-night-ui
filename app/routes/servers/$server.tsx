@@ -122,7 +122,7 @@ export default function ServerView() {
     toons: group.toonNames.map((name) => toonFinder(name) || name),
   }));
   const groupedToons = enhancedGroups.flatMap((group) =>
-    group.toons.filter((i) => typeof i == "string")
+    group.toons.filter((i) => typeof i != "string")
   );
   const waitingToons = allLfgToons.filter(
     (toon: Toon) => !groupedToons.includes(toon)
