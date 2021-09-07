@@ -55,7 +55,7 @@ export default function ToonRow(props: Props) {
       <div className="toon-roles">{toon.roles.map(roleMapper)}</div>
       {showMaxDifficulty && (
         <div className="toon-max-difficulty">
-          <Difficulty difficulty={getMaxDifficulty(toon.difficulties)} />
+          <Difficulty difficulty={toon.maximumLevel} />
         </div>
       )}
       {showILevel && <div className="toon-ilevel">{toon.iLevel}</div>}

@@ -23,42 +23,12 @@ const iconMap = {
   healer: HealerIcon,
 };
 
-const difficultyMap = [
-  "normal",
-  "heroic",
-  "mythic",
-  "m2",
-  "m3",
-  "m4",
-  "m5",
-  "m6",
-  "m7",
-  "m8",
-  "m9",
-  "m10",
-  "m11",
-  "m12",
-  "m13",
-  "m14",
-  "m15",
-  "m16",
-  "m17",
-  "m18",
-  "m19",
-  "m20",
-];
-
 export default function EditableToonRow(props: Props) {
   const { toon, className, serverId, lfg = false } = props;
   const { name } = toon;
-  const maxDifficulty = getMaxDifficulty(toon.difficulties);
-  const maxDifficultyValue = difficultyMap.indexOf(maxDifficulty);
-  const sanitizedMaxDifficultyValue =
-    maxDifficultyValue == -1 ? 0 : maxDifficultyValue;
-  const [difficultyValue, setDifficultyValue] = useState(
-    sanitizedMaxDifficultyValue
-  );
-  const difficultyText = difficultyMap[difficultyValue] || "normal";
+  const maxDifficulty = toon.maximumLevel || 2;
+  const [difficultyValue, setDifficultyValue] = useState(maxDifficulty);
+  const difficultyText = difficultyValue;
   const lfgStyle = lfg ? "lfg-name" : "";
   return (
     <div className="toon-edit-layout">
@@ -110,11 +80,11 @@ export default function EditableToonRow(props: Props) {
         />
         <input type="hidden" name="name" value={toon.name} />
         <input type="hidden" name="server-id" value={serverId} />
-        <span>{difficultyText.substring(0, 3)}</span>
+        <span>+{difficultyText}</span>
         <input
           type="range"
-          min="0"
-          max="21"
+          min="2"
+          max="30"
           value={difficultyValue}
           className="maxDifficulty"
           id="maxDifficulty"

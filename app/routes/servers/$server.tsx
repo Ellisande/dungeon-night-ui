@@ -72,11 +72,11 @@ export let action: ActionFunction = async ({ request, context }) => {
       .filter((i) => i)
       .map((i) => i as Role);
     const maxDifficulty = Number(body.get("maxDifficulty"));
-    const difficulties = getAllDifficultiesLessThan(maxDifficulty);
     const toonUpdates = {
       roles,
       iLevel,
-      difficulties,
+      minimumLevel: 2,
+      maximumLevel: maxDifficulty,
     };
     try {
       await updateToon(serverId, name, userId, toonUpdates);

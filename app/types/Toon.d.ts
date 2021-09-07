@@ -4,6 +4,8 @@ export type Toon = {
   iLevel: number;
   difficulties: string[];
   userId?: string;
+  maximumLevel: number;
+  minimumLevel: number;
 };
 
 type Role = "tank" | "dps" | "healer";
