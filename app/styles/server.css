@@ -77,3 +77,14 @@ select {
   text-decoration: none;
   padding: 0.3em 2em;
 }
+
+.create {
+  background-color: var(--color-start);
+  color: white;
+  text-decoration: none;
+  padding: 0.3em 2em;
+}
+
+.server-actions > * + * {
+  margin-left: 1em;
+}

@@ -117,6 +117,22 @@ const update =
     });
   };
 
+async function createToon(serverId: string, userId: string, toonName: string) {
+  const toonUpdate = (oldState: any): Partial<Toon> => {
+    if (oldState) {
+      return oldState;
+    }
+    return {
+      name: toonName,
+      iLevel: 0,
+      roles: [],
+      difficulties: [],
+      userId: userId,
+    };
+  };
+  return await update(`/guilds/${serverId}/toons/${toonName}`)(toonUpdate);
+}
+
 async function getToonsForUser(serverId: string, ownerId: string) {
   const toonsQuery = query(
     collection(getDb(), `/guilds/${serverId}/toons`),
@@ -229,6 +245,7 @@ export {
   getGroups,
   getToonsForUser,
   updateToon,
+  createToon,
   addToLfg,
   removeFromLfg,
   getUnclaimedToons,
