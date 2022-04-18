@@ -9,6 +9,7 @@ import {
   where,
   doc,
   runTransaction,
+  deleteDoc,
 } from "firebase/firestore";
 import { Auth, getAuth as getFirebaseAuth } from "firebase/auth";
 // import * as admin from "firebase-admin";
@@ -133,6 +134,15 @@ async function createToon(serverId: string, userId: string, toonName: string) {
   return await update(`/guilds/${serverId}/toons/${toonName}`)(toonUpdate);
 }
 
+async function clearAllGroupsAndLfg(serverId: string) {
+  const groups = await getGroups(serverId);
+  const clearGroupPromises = groups.map((group) =>
+    removeGroup(serverId, group.id)
+  );
+  const clearLfgPromise = clearLfg(serverId);
+  return await Promise.all([...clearGroupPromises, clearLfgPromise]);
+}
+
 async function getToonsForUser(serverId: string, ownerId: string) {
   const toonsQuery = query(
     collection(getDb(), `/guilds/${serverId}/toons`),
@@ -161,6 +171,19 @@ async function getGroups(serverId: string) {
     } as Group);
   });
   return groups;
+}
+
+async function removeGroup(serverId: string, groupId: string) {
+  return await deleteDoc(doc(getDb(), `/guilds/${serverId}/groups/${groupId}`));
+}
+
+async function clearLfg(serverId: string) {
+  const listUpdate = (oldState: any = { toonNames: [] }) => {
+    return {
+      toonNames: [],
+    };
+  };
+  return await update(`/guilds/${serverId}/lfg/toonNames`)(listUpdate);
 }
 
 async function getToon(serverId: string, toonName: string) {
@@ -250,4 +273,5 @@ export {
   removeFromLfg,
   getUnclaimedToons,
   claimToon,
+  clearAllGroupsAndLfg,
 };

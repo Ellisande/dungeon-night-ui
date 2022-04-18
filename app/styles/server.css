@@ -4,6 +4,10 @@
   grid-row-gap: 10px;
 }
 
+.groups-layout > * + * {
+  margin-top: 10px;
+}
+
 .server-nav {
   display: flex;
   flex-direction: column;
@@ -80,6 +84,13 @@ select {
 
 .create {
   background-color: var(--color-start);
+  color: white;
+  text-decoration: none;
+  padding: 0.3em 2em;
+}
+
+.end {
+  background-color: var(--color-stop);
   color: white;
   text-decoration: none;
   padding: 0.3em 2em;

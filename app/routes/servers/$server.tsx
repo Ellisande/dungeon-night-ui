@@ -6,6 +6,7 @@ import {
   ActionFunction,
   redirect,
   Link,
+  Form,
 } from "remix";
 import ToonRow from "../../components/Toon";
 import { Group } from "../../types/Group";
@@ -18,6 +19,7 @@ import {
   updateToon,
   addToLfg,
   removeFromLfg,
+  clearAllGroupsAndLfg,
 } from "../../utils/firebase";
 import toonStylesUrl from "../../styles/toons.css";
 import groupStylesUrl from "../../styles/groups.css";
@@ -28,6 +30,8 @@ import { getUserSession, requireUserSession } from "../../utils/session";
 import { getAllDifficultiesLessThan } from "../../utils/toonUtils";
 import ToonHeaderRow from "../../components/ToonHeaders";
 import EditableToonHeaderRow from "../../components/EditableToonHeader";
+
+type Action = "shuffle" | "end" | "edit";
 
 export let links: LinksFunction = () => {
   return [
@@ -57,21 +61,22 @@ export let loader: LoaderFunction = async ({ params, request }) => {
 };
 
 export let action: ActionFunction = async ({ request, context }) => {
-  let body = new URLSearchParams(await request.text());
-  const serverId = body.get("server-id") as string;
+  let body = Object.fromEntries(new URLSearchParams(await request.text()));
 
-  if (request.method.toLowerCase() == "post") {
+  const serverId: string = body["server-id"];
+  const action: Action = body.action as Action;
+
+  if (request.method.toLowerCase() == "post" && action == "edit") {
     const { userId } = await getUserSession(request);
-    const name = body.get("name") as string;
-    const tank = body.get("tank") ? "tank" : null;
-    const dps = body.get("dps") ? "dps" : null;
-    const healer = body.get("healer") ? "healer" : null;
-    const iLevel = Number(body.get("iLevel"));
-    const serverId = body.get("server-id") as string;
+    const name = body.name as string;
+    const tank = body.tank ? "tank" : null;
+    const dps = body.dps ? "dps" : null;
+    const healer = body.healer ? "healer" : null;
+    const iLevel = Number(body.iLevel);
     const roles: Role[] = [tank, dps, healer]
       .filter((i) => i)
       .map((i) => i as Role);
-    const maxDifficulty = Number(body.get("maxDifficulty"));
+    const maxDifficulty = Number(body.maxDifficulty);
     const toonUpdates = {
       roles,
       iLevel,
@@ -85,14 +90,19 @@ export let action: ActionFunction = async ({ request, context }) => {
     }
   }
   if (request.method.toLowerCase() == "put") {
-    const toonName = body.get("name") as string;
+    const toonName = body.name as string;
 
     await addToLfg(serverId, toonName);
   }
   if (request.method.toLowerCase() == "delete") {
-    const toonName = body.get("name") as string;
+    const toonName = body.name as string;
 
     await removeFromLfg(serverId, toonName);
+  }
+  if (request.method.toLowerCase() == "post" && action == "shuffle") {
+  }
+  if (request.method.toLowerCase() == "post" && action == "end") {
+    await clearAllGroupsAndLfg(serverId);
   }
 
   return redirect(`/servers/${serverId}`);
@@ -129,8 +139,24 @@ export default function ServerView() {
   );
 
   return (
-    <div>
+    <div className="groups-layout">
       <h2>Groups: {groups.length}</h2>
+      <div>
+        {/* <form method="post">
+          <input type="hidden" name="server-id" value={serverId} />
+          <input type="hidden" name="action" value="shuffle" />
+          <button type="submit" className="claim button">
+            Shuffle Groups
+          </button>
+        </form> */}
+        <form method="post">
+          <input type="hidden" name="server-id" value={serverId} />
+          <input type="hidden" name="action" value="end" />
+          <button type="submit" className="end button">
+            End the Night
+          </button>
+        </form>
+      </div>
       <div className="groups">
         {enhancedGroups?.length > 0 &&
           enhancedGroups.map((group) => (

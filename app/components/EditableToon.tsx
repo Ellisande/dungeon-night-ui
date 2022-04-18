@@ -32,7 +32,8 @@ export default function EditableToonRow(props: Props) {
   const lfgStyle = lfg ? "lfg-name" : "";
   return (
     <div className="toon-edit-layout">
-      <Form className={`toon-editable ${className}`} method="post">
+      <form className={`toon-editable ${className}`} method="post">
+        <input type="hidden" name="action" value="edit" />
         <div className={`toon-name ${lfgStyle}`}>{toon.name}</div>
         <div>
           <input
@@ -94,7 +95,7 @@ export default function EditableToonRow(props: Props) {
         <button type="submit" className="button update">
           <UpdateIcon />
         </button>
-      </Form>
+      </form>
       {!lfg && (
         <Form method="put">
           <input type="hidden" name="server-id" value={serverId} />
