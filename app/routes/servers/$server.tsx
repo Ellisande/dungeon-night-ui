@@ -20,6 +20,7 @@ import {
   addToLfg,
   removeFromLfg,
   clearAllGroupsAndLfg,
+  shuffleGroups,
 } from "../../utils/firebase";
 import toonStylesUrl from "../../styles/toons.css";
 import groupStylesUrl from "../../styles/groups.css";
@@ -100,6 +101,7 @@ export let action: ActionFunction = async ({ request, context }) => {
     await removeFromLfg(serverId, toonName);
   }
   if (request.method.toLowerCase() == "post" && action == "shuffle") {
+    await shuffleGroups(serverId);
   }
   if (request.method.toLowerCase() == "post" && action == "end") {
     await clearAllGroupsAndLfg(serverId);
@@ -141,14 +143,14 @@ export default function ServerView() {
   return (
     <div className="groups-layout">
       <h2>Groups: {groups.length}</h2>
-      <div>
-        {/* <form method="post">
+      <div className="group-actions">
+        <form method="post">
           <input type="hidden" name="server-id" value={serverId} />
           <input type="hidden" name="action" value="shuffle" />
           <button type="submit" className="claim button">
             Shuffle Groups
           </button>
-        </form> */}
+        </form>
         <form method="post">
           <input type="hidden" name="server-id" value={serverId} />
           <input type="hidden" name="action" value="end" />
