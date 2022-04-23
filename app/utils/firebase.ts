@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { Group } from "./../types/Group.d";
 import { initializeApp, getApps, getApp } from "firebase/app";
 import {
@@ -27,6 +28,51 @@ function initialize() {
     initializeApp(config);
   }
 }
+
+const MAX_GROUP_SIZE = 5;
+
+// - find tank / healer
+// - fill with dps (prefer no tank or healer)
+const createGroupsForDifficulty = (
+  lfgToons: Toon[],
+  difficulty: Number,
+  validSize = 5
+): Group[] => {
+  const difficultySeekers = lfgToons.filter(
+    (toon) => difficulty >= toon.minimumLevel && difficulty <= toon.maximumLevel
+  );
+  if (difficultySeekers.length == 0) {
+    return [];
+  }
+  let remaining = [...difficultySeekers];
+  const tank = remaining.find((toon) => toon.roles.includes("tank"));
+  if (tank) {
+    remaining = remaining.filter((toon) => toon !== tank);
+  }
+  const healer = remaining.find((toon) => toon.roles.includes("healer"));
+  if (healer) {
+    remaining = remaining.filter((toon) => toon !== healer);
+  }
+  const dps = remaining
+    .filter((toon) => toon.roles.includes("dps"))
+    .slice(0, 3);
+  remaining = remaining.filter((toon) => !dps.includes(toon));
+  const potentialGroupToons = [tank, healer, ...dps].filter((i) => i) as Toon[];
+  const isValidGroup = potentialGroupToons.length >= validSize;
+  if (!isValidGroup) {
+    return [];
+  }
+  const group = {
+    toonNames: potentialGroupToons.map((toon) => toon.name),
+    locked: false,
+    full: potentialGroupToons.length == MAX_GROUP_SIZE,
+    difficulty: difficulty,
+  };
+  return [
+    group,
+    ...createGroupsForDifficulty(remaining, difficulty, validSize),
+  ] as Group[]; // array of full groups
+};
 
 async function claimToon(serverId: string, userId: string, toonName: string) {
   const updateToon = (oldState: Toon) => {
@@ -250,6 +296,117 @@ function getDb() {
 //   return lazyAdminAuth;
 // }
 
+type GroupBuilder = {
+  remainingPlayers: Toon[];
+  groups: Group[];
+};
+
+async function shuffleGroups(serverId: string) {
+  // get list of LFG toons
+  const lfgToonNames = await getLfgToonNames(serverId);
+  const lfgToonsPromises = lfgToonNames.map(
+    async (name: string) => await getToon(serverId, name)
+  );
+  const lfgToons = await Promise.all(lfgToonsPromises);
+  const shuffledLfgToons = _.shuffle(lfgToons);
+  const sortedLfgToons = _.sortBy(shuffledLfgToons, [
+    "roles.length",
+    "maximumLevel",
+  ]);
+
+  const lowestLevel = Math.min(...lfgToons.map((toon) => toon.minimumLevel));
+  const highestLevel = Math.max(...lfgToons.map((toon) => toon.maximumLevel));
+
+  const allDifficulties = _.range(highestLevel, lowestLevel);
+
+  const fullGroupsAndRemaining = allDifficulties.reduce(
+    (previous: GroupBuilder, difficulty) => {
+      const newGroups = createGroupsForDifficulty(
+        previous.remainingPlayers,
+        difficulty
+      );
+      const filteredRemaining = previous.remainingPlayers.filter(
+        (toon) =>
+          !newGroups.flatMap((group) => group.toonNames).includes(toon.name)
+      );
+      return {
+        remainingPlayers: filteredRemaining,
+        groups: [...previous.groups, ...newGroups],
+      };
+    },
+    {
+      remainingPlayers: sortedLfgToons,
+      groups: [],
+    }
+  );
+
+  const partialGroupsAndRemaining = allDifficulties.reduce(
+    (previous: GroupBuilder, difficulty) => {
+      const newGroups = createGroupsForDifficulty(
+        previous.remainingPlayers,
+        difficulty,
+        3
+      );
+      const filteredRemaining = previous.remainingPlayers.filter(
+        (toon) =>
+          !newGroups.flatMap((group) => group.toonNames).includes(toon.name)
+      );
+      return {
+        remainingPlayers: filteredRemaining,
+        groups: [...previous.groups, ...newGroups],
+      };
+    },
+    {
+      remainingPlayers: fullGroupsAndRemaining.remainingPlayers,
+      groups: [],
+    }
+  );
+
+  // consider anyone else "still waiting"
+
+  const allUnsavedGroups = [
+    ...fullGroupsAndRemaining.groups,
+    ...partialGroupsAndRemaining.groups,
+  ].map((group, index) => ({ ...group, id: index + 1 + "" }));
+
+  try {
+    const allGroups = await getGroups(serverId);
+    await Promise.all(
+      allGroups.map((group) => removeGroup(serverId, group.id))
+    );
+    await Promise.all(
+      allUnsavedGroups.map((unsavedGroup) =>
+        createGroup(serverId, unsavedGroup)
+      )
+    );
+  } catch (error) {
+    // TODO: Do something different here?
+    throw error;
+  }
+
+  return await getGroups(serverId);
+}
+
+const createGroup = (serverId: string, group: Group) => {
+  const id = group?.id || _.uniqueId("");
+  const upsertGroup = update(`guilds/${serverId}/groups/${id}`);
+  return upsertGroup((oldGroup: Group) => {
+    const oldOrEmpty = oldGroup
+      ? oldGroup
+      : {
+          toonNames: [],
+          locked: false,
+          full: false,
+          difficulty: "normal",
+        };
+    const updated = {
+      ...oldOrEmpty,
+      ...group,
+    };
+    return updated;
+  });
+};
+
 let lazyAuth: Auth;
 function getAuth() {
   initialize();
@@ -274,4 +431,5 @@ export {
   getUnclaimedToons,
   claimToon,
   clearAllGroupsAndLfg,
+  shuffleGroups,
 };
