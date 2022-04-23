@@ -8,6 +8,15 @@
   margin-top: 10px;
 }
 
+.group-actions {
+  flex-direction: row;
+  display: flex;
+}
+
+.group-actions > * + * {
+  margin-left: 5em;
+}
+
 .server-nav {
   display: flex;
   flex-direction: column;
