@@ -18,6 +18,7 @@ import { config } from "../../firebaseConfig";
 import { Toon } from "../types/Toon";
 import { Server } from "../types/Server";
 import cert from "../../firebaseCert.json";
+import { RaiderCharacter } from "./raider";
 
 if (!getApps().length) {
   initializeApp(config);
@@ -178,6 +179,28 @@ async function createToon(serverId: string, userId: string, toonName: string) {
     };
   };
   return await update(`/guilds/${serverId}/toons/${toonName}`)(toonUpdate);
+}
+
+export async function createToonFromRaider(
+  serverId: string,
+  userId: string,
+  toon: RaiderCharacter
+) {
+  const toonUpdate = (oldState: any): Partial<Toon> => {
+    if (oldState) {
+      return oldState;
+    }
+    return {
+      name: toon.name,
+      iLevel: toon.iLevel,
+      roles: [],
+      difficulties: [],
+      userId,
+      averageHighest: toon.averageHighestRun,
+      mythicScore: toon.mythicScore,
+    };
+  };
+  return await update(`/guilds/${serverId}/toons/${toon.name}`)(toonUpdate);
 }
 
 async function clearAllGroupsAndLfg(serverId: string) {

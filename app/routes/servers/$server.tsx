@@ -1,38 +1,35 @@
 import {
-  json,
-  LoaderFunction,
-  useRouteData,
-  LinksFunction,
   ActionFunction,
-  redirect,
+  json,
   Link,
-  Form,
+  LinksFunction,
+  LoaderFunction,
+  redirect,
+  useRouteData,
 } from "remix";
+import EditableToon from "../../components/EditableToon";
+import GroupContainer from "../../components/Group";
 import ToonRow from "../../components/Toon";
+import ToonHeaderRow from "../../components/ToonHeaders";
+import groupStylesUrl from "../../styles/groups.css";
+import toonStylesUrl from "../../styles/toons.css";
 import { Group } from "../../types/Group";
 import { Role, Toon } from "../../types/Toon";
 import {
-  getLfgToonNames,
+  addToLfg,
+  clearAllGroupsAndLfg,
   getGroups,
+  getLfgToonNames,
   getToon,
   getToonsForUser,
-  updateToon,
-  addToLfg,
   removeFromLfg,
-  clearAllGroupsAndLfg,
   shuffleGroups,
+  updateToon,
 } from "../../utils/firebase";
-import toonStylesUrl from "../../styles/toons.css";
-import groupStylesUrl from "../../styles/groups.css";
-import GroupContainer from "../../components/Group";
-import EditableToonRow from "../../components/EditableToon";
-import { useAuthenticated } from "../../hooks/useAuthenticated";
+import { getCharacter } from "../../utils/raider";
 import { getUserSession, requireUserSession } from "../../utils/session";
-import { getAllDifficultiesLessThan } from "../../utils/toonUtils";
-import ToonHeaderRow from "../../components/ToonHeaders";
-import EditableToonHeaderRow from "../../components/EditableToonHeader";
 
-type Action = "shuffle" | "end" | "edit";
+type Action = "shuffle" | "end" | "save" | "startLfg" | "endLfg" | "refresh";
 
 export let links: LinksFunction = () => {
   return [
@@ -55,47 +52,41 @@ export let loader: LoaderFunction = async ({ params, request }) => {
     const userToons = (await getToonsForUser(serverId, userId)) || [];
     return json({ lfgToonNames, groups, toons, userToons, serverId });
   });
-
-  // use db to fetch groups?
-  // use db to fetch lfg toons?
-  // use db to fetch all toons?
 };
 
-export let action: ActionFunction = async ({ request, context }) => {
+export let action: ActionFunction = async ({ request }) => {
   let body = Object.fromEntries(new URLSearchParams(await request.text()));
 
-  const serverId: string = body["server-id"];
+  const serverId: string = body["serverId"];
   const action: Action = body.action as Action;
 
-  if (request.method.toLowerCase() == "post" && action == "edit") {
+  if (request.method.toLowerCase() == "post" && action == "save") {
     const { userId } = await getUserSession(request);
     const name = body.name as string;
     const tank = body.tank ? "tank" : null;
     const dps = body.dps ? "dps" : null;
     const healer = body.healer ? "healer" : null;
-    const iLevel = Number(body.iLevel);
     const roles: Role[] = [tank, dps, healer]
       .filter((i) => i)
       .map((i) => i as Role);
     const maxDifficulty = Number(body.maxDifficulty);
     const toonUpdates = {
       roles,
-      iLevel,
       minimumLevel: 2,
       maximumLevel: maxDifficulty,
     };
     try {
       await updateToon(serverId, name, userId, toonUpdates);
     } catch {
-      redirect(`/servers/${serverId}`);
+      return redirect(`/servers/${serverId}`);
     }
   }
-  if (request.method.toLowerCase() == "put") {
+  if (request.method.toLowerCase() == "post" && action == "startLfg") {
     const toonName = body.name as string;
 
     await addToLfg(serverId, toonName);
   }
-  if (request.method.toLowerCase() == "delete") {
+  if (request.method.toLowerCase() == "post" && action == "endLfg") {
     const toonName = body.name as string;
 
     await removeFromLfg(serverId, toonName);
@@ -105,6 +96,15 @@ export let action: ActionFunction = async ({ request, context }) => {
   }
   if (request.method.toLowerCase() == "post" && action == "end") {
     await clearAllGroupsAndLfg(serverId);
+  }
+  if (request.method.toLowerCase() == "post" && action == "refresh") {
+    const name = body.name as string;
+    const realm = body.realm as string;
+    const { userId } = await getUserSession(request);
+    try {
+      const raiderToon = await getCharacter(name, realm);
+      await updateToon(serverId, name, userId, raiderToon);
+    } catch (e) {}
   }
 
   return redirect(`/servers/${serverId}`);
@@ -145,14 +145,14 @@ export default function ServerView() {
       <h2>Groups: {groups.length}</h2>
       <div className="group-actions">
         <form method="post">
-          <input type="hidden" name="server-id" value={serverId} />
+          <input type="hidden" name="serverId" value={serverId} />
           <input type="hidden" name="action" value="shuffle" />
           <button type="submit" className="claim button">
             Shuffle Groups
           </button>
         </form>
         <form method="post">
-          <input type="hidden" name="server-id" value={serverId} />
+          <input type="hidden" name="serverId" value={serverId} />
           <input type="hidden" name="action" value="end" />
           <button type="submit" className="end button">
             End the Night
@@ -179,9 +179,8 @@ export default function ServerView() {
       <h2>Your Characters</h2>
       {userToons?.length > 0 && (
         <div className="characters">
-          <EditableToonHeaderRow />
           {userToons.map((toon: Toon) => (
-            <EditableToonRow
+            <EditableToon
               key={toon.name}
               toon={toon}
               serverId={serverId}
