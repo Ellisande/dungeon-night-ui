@@ -108,3 +108,8 @@ select {
 .server-actions > * + * {
   margin-left: 1em;
 }
+
+.characters {
+  display: flex;
+  flex-wrap: wrap;
+}
