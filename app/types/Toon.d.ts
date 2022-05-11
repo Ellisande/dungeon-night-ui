@@ -7,7 +7,7 @@ export type Toon = {
   maximumLevel: number;
   minimumLevel: number;
   realm?: string;
-  averageHighest?: number;
+  averageHighestRun?: number;
   mythicScore?: number;
 };
 

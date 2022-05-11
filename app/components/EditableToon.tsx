@@ -21,7 +21,7 @@ export default function EditableToon(props: Props) {
   const difficultyText =
     difficultyValue < 10 ? "0" + difficultyValue : difficultyValue;
   const lfgStyle = lfg ? "lfg" : "";
-  const maxKey = (toon.averageHighest || 0) + 2;
+  const maxKey = (toon.averageHighestRun || 0) + 2;
   return (
     <div className={"toon-rows-layout " + lfgStyle}>
       <div className="toon-edit-row info-row">

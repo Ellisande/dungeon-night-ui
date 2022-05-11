@@ -196,7 +196,7 @@ export async function createToonFromRaider(
       roles: [],
       difficulties: [],
       userId,
-      averageHighest: toon.averageHighestRun,
+      averageHighestRun: toon.averageHighestRun,
       mythicScore: toon.mythicScore,
     };
   };
