@@ -118,3 +118,7 @@ select {
   display: flex;
   flex-wrap: wrap;
 }
+
+body .Toastify__toast-container--top-center {
+  width: 50%;
+}

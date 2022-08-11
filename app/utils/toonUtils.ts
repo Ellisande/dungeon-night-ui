@@ -53,17 +53,6 @@ const difficultyMap = [
   "m19",
   "m20",
 ];
-
-const keyLevelCalc = (level: number) => {
-  if (level < 2) {
-    return 245;
-  }
-  if (level < 16) {
-    return 245 + (level - 2) * 3.5;
-  }
-  return 290;
-};
-
 export type LfgErrors = {
   noRoles?: string;
   noLevels?: string;
@@ -74,6 +63,22 @@ export type LfgWarnings = {
   lowILevel?: string;
 };
 
+const naughtyBoyMessage = `Listing for keys that your gear is too weak for can negatively impact the group's ability to complete the key. As a courtesy to others, please reduce your maximum key to be sure you're able to contribute to the group.`;
+
+const buildILevelWarningMessage = (
+  toonName: string,
+  iLevel: number,
+  maxLevel: number
+) =>
+  `${_.capitalize(
+    toonName
+  )}'s item level is dangerously low for level ${maxLevel} keys. The recommended item level is ${Math.ceil(
+    keyLevelCalc(maxLevel)
+  )}, and their item level is ${iLevel}. Based on your gear, a level ${recommendedKey(
+    iLevel
+  )} key is more appropriate.
+
+${naughtyBoyMessage}`;
 export const checkLfgReqs = async (serverId: string, toonName: string) => {
   const toon: Toon = (await getToon(serverId, toonName)) as unknown as Toon;
   const errors: LfgErrors = {};
@@ -89,14 +94,32 @@ export const checkLfgReqs = async (serverId: string, toonName: string) => {
     errors.minimumILevel = `${displayName} does not meet the minimum iLevel of 245 for Season 4 keys`;
   }
   if (toon.iLevel < keyLevelCalc(toon.maximumLevel)) {
-    warnings.lowILevel = `${displayName}'s item level is dangerously low for level ${
+    warnings.lowILevel = buildILevelWarningMessage(
+      toon.name,
+      toon.iLevel,
       toon.maximumLevel
-    } keys recommended item level is ${Math.ceil(
-      keyLevelCalc(toon.maximumLevel)
-    )}`;
+    );
   }
   return {
     errors,
     warnings,
   };
+};
+
+export const keyLevelCalc = (keyLevel: number) => {
+  if (keyLevel < 2) {
+    return 245;
+  }
+  const reqILevel = 245 + (keyLevel - 2) * 2.69;
+  return Math.min(reqILevel, 304);
+};
+
+export const recommendedKey = (iLevel: number) => {
+  if (iLevel >= 304) {
+    return 20;
+  }
+  if (iLevel < 245) {
+    return 0;
+  }
+  return Math.floor((iLevel - 245) / 2.69 + 2);
 };

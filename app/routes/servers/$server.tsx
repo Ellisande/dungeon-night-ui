@@ -6,7 +6,7 @@ import type {
 } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer, toast, Slide } from "react-toastify";
 import _ from "lodash";
 import toastifyStylesUrl from "react-toastify/dist/ReactToastify.css";
 import EditableToon from "../../components/EditableToon";
@@ -164,7 +164,9 @@ export default function ServerView() {
     Object.values(warnings).forEach((warning) =>
       toast.warning(warning, {
         toastId: warning,
-        autoClose: 10000,
+        autoClose: false,
+        position: "top-center",
+        transition: Slide,
       })
     );
   }
@@ -187,7 +189,11 @@ export default function ServerView() {
 
   return (
     <div className="groups-layout">
-      <ToastContainer theme="colored" style={{ fontSize: "1rem" }} />
+      <ToastContainer
+        theme="colored"
+        style={{ fontSize: "1rem" }}
+        closeOnClick
+      />
       <h2>Groups: {groups.length}</h2>
       <div className="group-actions">
         <form method="post">
