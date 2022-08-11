@@ -1,0 +1,26 @@
+.claim-layout {
+  display: flex;
+  flex-direction: column;
+  max-width: 30vw;
+}
+
+.claim-layout > * + * {
+  margin-top: 1.5em;
+}
+
+.toon-select {
+  background-color: var(--color-info);
+  color: white;
+  font-size: 1.3rem;
+  border-radius: 5px;
+  padding: 0.3rem;
+  border: 0;
+}
+
+.claim-toon {
+  background-color: var(--color-start);
+  color: white;
+  font-size: 1.3rem;
+  border: 0;
+  padding: 1rem 0;
+}
