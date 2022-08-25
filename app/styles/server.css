@@ -11,6 +11,7 @@ body {
 
 .groups-layout > * + * {
   margin-top: 10px;
+  padding-bottom: 2rem;
 }
 
 .group-actions {
@@ -27,7 +28,7 @@ body {
   flex-direction: column;
   justify-content: flex-start;
   background-color: rgb(17, 132, 167);
-  height: 100vh;
+  min-height: 100vh;
   border-radius: 0 5px 5px 0;
 }
 
