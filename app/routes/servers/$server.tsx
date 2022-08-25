@@ -183,8 +183,11 @@ export default function ServerView() {
   const groupedToons = enhancedGroups.flatMap((group) =>
     group.toons.filter((i) => typeof i != "string")
   );
-  const waitingToons = allLfgToons.filter(
+  let waitingToons = allLfgToons.filter(
     (toon: Toon) => !groupedToons.includes(toon)
+  );
+  waitingToons = [...waitingToons].sort(
+    (left: Toon, right: Toon) => right.maximumLevel - left.maximumLevel
   );
 
   return (
