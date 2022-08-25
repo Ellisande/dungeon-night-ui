@@ -17,7 +17,10 @@ if (!getApps()?.length) {
 }
 
 export let links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: stylesUrl }];
+  return [
+    { rel: "stylesheet", href: stylesUrl },
+    { rel: "icon", type: "imagine/png", href: "/favicon.png" },
+  ];
 };
 
 export const meta: MetaFunction = () => ({
