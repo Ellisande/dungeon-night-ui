@@ -21,9 +21,6 @@ export default function GroupContainer(props: Props) {
   return (
     <div className="group">
       <div className="group-id">Group {group.id}</div>
-      <div className="group-difficulty">
-        <Difficulty difficulty={group.difficulty} />
-      </div>
       <div className="group-full">{group.full ? "Full" : ""}</div>
       <div className="group-members">
         {!toons.length &&
