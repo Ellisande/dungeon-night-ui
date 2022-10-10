@@ -5,7 +5,8 @@ body {
 }
 .groups {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 15em 15em;
+  grid-column-gap: 2rem;
   grid-row-gap: 10px;
 }
 

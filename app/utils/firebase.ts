@@ -199,6 +199,7 @@ export async function createToonFromRaider(
       userId,
       averageHighestRun: toon.averageHighestRun,
       mythicScore: toon.mythicScore,
+      realm: toon.realm,
     };
   };
   return await update(`/guilds/${serverId}/toons/${toon.name}`)(toonUpdate);
