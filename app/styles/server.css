@@ -5,7 +5,8 @@ body {
 }
 .groups {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-column-gap: 2rem;
   grid-row-gap: 10px;
 }
 
@@ -118,6 +119,7 @@ select {
 .characters {
   display: flex;
   flex-wrap: wrap;
+  gap: 1rem;
 }
 
 body .Toastify__toast-container--top-center {

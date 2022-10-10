@@ -1,7 +1,7 @@
 .toon {
   display: grid;
   grid-template-columns: 1fr 0.7fr 1fr 3rem;
-  width: 35em;
+  width: 21em;
 }
 
 .toon-rows-layout {
@@ -9,8 +9,9 @@
   flex-direction: column;
   border-radius: 7px;
   border: 1px solid black;
-  width: 16em;
+  width: 12em;
   padding: 0.5em;
+  gap: 1rem;
 }
 
 .toon-rows-layout.lfg {
@@ -23,6 +24,7 @@
 
 .toon-edit-row {
   display: flex;
+  justify-content: space-around;
   align-items: center;
   gap: 1rem;
 }
@@ -71,6 +73,11 @@ input.toon-roles {
   display: none;
 }
 
+.toon-roles {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .save {
   color: white;
   background-color: var(--color-info);
@@ -88,7 +95,6 @@ input.toon-roles {
 button.refresh {
   color: white;
   background-color: var(--color-info);
-  transform: scale(0.8);
 }
 
 .stop {
@@ -145,7 +151,7 @@ button.refresh {
 }
 
 .info-row {
-  justify-content: space-between;
+  justify-content: center;
 }
 
 .info-row > *:first-child {

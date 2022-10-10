@@ -24,10 +24,10 @@ export default function EditableToon(props: Props) {
   const maxKey = (toon.averageHighestRun || 0) + 2;
   return (
     <div className={"toon-rows-layout " + lfgStyle}>
-      <div className="toon-edit-row info-row">
-        <div className="toon-name">
-          <strong>{toon.name}</strong>
-        </div>
+      <div className="toon-edit-row info-row toon-name">
+        <strong>{toon.name}</strong>
+      </div>
+      <form method="post" className="toon-edit-row">
         <div className="label-pair">
           <div>iLevel</div>
           <div>{toon.iLevel || 0}</div>
@@ -36,21 +36,6 @@ export default function EditableToon(props: Props) {
           <div>score</div>
           <div>{toon.mythicScore || 0}</div>
         </div>
-        <div className="label-pair">
-          <div>max key</div>
-          <div>{maxKey}</div>
-        </div>
-        <form method="post" className="refresh">
-          <input type="hidden" name="serverId" value={serverId} />
-          <input type="hidden" name="name" value={toon.name} />
-          <input type="hidden" name="action" value="refresh" />
-          <input type="hidden" name="realm" value={toon.realm} />
-          <button className="button refresh">
-            <RefreshIcon />
-          </button>
-        </form>
-      </div>
-      <form method="post" className="toon-edit-row">
         <input type="hidden" name="serverId" value={serverId} />
         <input type="hidden" name="name" value={toon.name} />
         <input type="hidden" name="action" value="save" />
@@ -92,28 +77,21 @@ export default function EditableToon(props: Props) {
             </label>
           </div>
         </div>
-
-        <div className="difficulty">
-          <span>Keys</span>
-          <div className="difficulty-number">+{difficultyText}</div>
-          <input
-            type="range"
-            min="2"
-            max={maxKey}
-            value={difficultyValue}
-            className="maxDifficulty"
-            id="maxDifficulty"
-            name="maxDifficulty"
-            onChange={(e) => setDifficultyValue(Number(e.target.value))}
-          />
-        </div>
         <div className="">
-          <button type="submit" className="button save">
-            <UpdateIcon />
+          <button type="submit" className="button lfg save">
+            Save
           </button>
         </div>
       </form>
-      <div className="toon-edit-row lfg-row">
+      <div className="toon-edit-row">
+        <form method="post" className="refresh">
+          <input type="hidden" name="serverId" value={serverId} />
+          <input type="hidden" name="name" value={toon.name} />
+          <input type="hidden" name="action" value="refresh" />
+          <input type="hidden" name="realm" value={toon.realm} />
+          <button className="button lfg refresh">Refresh</button>
+        </form>
+
         {!lfg && (
           <form method="post">
             <input type="hidden" name="serverId" value={serverId} />
