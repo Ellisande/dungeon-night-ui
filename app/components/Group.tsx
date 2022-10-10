@@ -1,3 +1,4 @@
+import _ from "lodash";
 import type { Group } from "../types/Group";
 import type { Toon } from "../types/Toon";
 import Difficulty from "./Difficulty";
@@ -18,6 +19,11 @@ const toonOrNameMapper = (toonOrName: Toon | string) => {
 
 export default function GroupContainer(props: Props) {
   const { group, toons = [] } = props;
+  const numPugs = Math.max(5 - toons.length, 0);
+  let pugs: number[] = [];
+  for (let i = 0; i < numPugs; i++) {
+    pugs = [...pugs, i];
+  }
   return (
     <div className="group">
       <div className="group-id">Group {group.id}</div>
@@ -30,6 +36,12 @@ export default function GroupContainer(props: Props) {
             </div>
           ))}
         {toons.length > 0 && toons.map(toonOrNameMapper)}
+        {pugs.map(() => (
+          <div>
+            <div>Pug</div>
+            <div />
+          </div>
+        ))}
       </div>
     </div>
   );
