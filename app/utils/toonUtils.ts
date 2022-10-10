@@ -84,9 +84,6 @@ export const checkLfgReqs = async (serverId: string, toonName: string) => {
   const errors: LfgErrors = {};
   const warnings: LfgWarnings = {};
   const displayName = _.capitalize(toon.name);
-  if (!toon.minimumLevel || !toon.maximumLevel) {
-    errors.noLevels = `${displayName} must set key levels to join LFG `;
-  }
   if (!toon.roles || toon.roles.length == 0) {
     errors.noRoles = `${displayName} must set roles for before joining LFG`;
   }
