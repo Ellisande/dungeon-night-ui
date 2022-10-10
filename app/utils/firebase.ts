@@ -332,7 +332,13 @@ async function shuffleGroups(serverId: string) {
   const lfgToonsPromises = lfgToonNames.map(
     async (name: string) => await getToon(serverId, name)
   );
-  const lfgToons = await Promise.all(lfgToonsPromises);
+  const lfgToons = await (
+    await Promise.all(lfgToonsPromises)
+  ).map((toon) => ({
+    ...toon,
+    minimumLevel: 2,
+    maximumLevel: 3,
+  }));
   const shuffledLfgToons = _.shuffle(lfgToons);
   const sortedLfgToons = _.sortBy(shuffledLfgToons, [
     "roles.length",
